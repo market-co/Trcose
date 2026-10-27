@@ -1,1 +1,150 @@
 
+
+exports.handler = async function (event) {
+  const params = event.queryStringParameters || {};
+  const type = params.type === "job" ? "job" : "product";
+  const id = params.id || "";
+
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const anonKey = process.env.SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !anonKey || !id) {
+    return { statusCode: 400, body: "Missing configuration or ID." };
+  }
+
+  if (!/^[0-9a-f-]{36}$/i.test(id)) {
+    return { statusCode: 400, body: "Invalid item ID." };
+  }
+
+  const esc = value => String(value || "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    '"': "&quot;", "'": "&#39;"
+  })[c]);
+
+  async function readTable(table, fields, filters = {}) {
+    const url = new URL(`/rest/v1/${table}`, supabaseUrl);
+    url.searchParams.set("select", fields);
+    url.searchParams.set("id", `eq.${id}`);
+    url.searchParams.set("limit", "1");
+
+    for (const [key, value] of Object.entries(filters)) {
+      url.searchParams.set(key, value);
+    }
+
+    const response = await fetch(url, {
+      headers: {
+        apikey: anonKey,
+        Authorization: `Bearer ${anonKey}`
+      }
+    });
+
+    if (!response.ok) throw new Error("Database read failed");
+    const rows = await response.json();
+    return rows[0] || null;
+  }
+
+  try {
+    let item;
+    let image = "";
+
+    if (type === "job") {
+      item = await readTable(
+        "jobs",
+        "id,title,company,description,image_url,media_url,video_url,is_public"
+      );
+
+      if (!item || item.is_public !== true) {
+        return { statusCode: 404, body: "Public job not found." };
+      }
+
+      image = item.image_url || item.media_url || "";
+    } else {
+      item = await readTable(
+        "products",
+        "id,name,title,description,image_url,image_urls,thumbnail_url,media_url,is_public"
+      );
+
+      if (!item || item.is_public === false) {
+        return { statusCode: 404, body: "Public product not found." };
+      }
+
+      image =
+        item.thumbnail_url ||
+        item.image_url ||
+        (Array.isArray(item.image_urls) ? item.image_urls[0] : "") ||
+        item.media_url ||
+        "";
+
+      if (!image) {
+        const url = new URL("/rest/v1/product_media", supabaseUrl);
+        url.searchParams.set("select", "file_url");
+        url.searchParams.set("product_id", `eq.${id}`);
+        url.searchParams.set("is_public", "eq.true");
+        url.searchParams.set("limit", "1");
+
+        const response = await fetch(url, {
+          headers: {
+            apikey: anonKey,
+            Authorization: `Bearer ${anonKey}`
+          }
+        });
+
+        if (response.ok) {
+          const media = await response.json();
+          image = media[0]?.file_url || "";
+        }
+      }
+    }
+
+    const title = type === "job"
+      ? item.title || "Job kuri Trcose Market"
+      : item.name || item.title || "Product kuri Trcose Market";
+
+    const description = item.description ||
+      "Reba amakuru arambuye kuri Trcose Market.";
+
+    const destination = new URL(
+      type === "job" ? "job.html" : "",
+      "https://market-co.github.io/Trcose/"
+    );
+    destination.searchParams.set(type, id);
+
+    const html = `<!doctype html>
+<html lang="rw">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(title)} | Trcose Market</title>
+<meta name="description" content="${esc(description)}">
+<meta property="og:site_name" content="Trcose Market">
+<meta property="og:type" content="website">
+<meta property="og:title" content="${esc(title)}">
+<meta property="og:description" content="${esc(description)}">
+<meta property="og:url" content="${esc(event.rawUrl || "")}">
+${image && /^https?:\/\//i.test(image)
+  ? `<meta property="og:image" content="${esc(image)}">`
+  : ""}
+<meta name="twitter:card" content="summary_large_image">
+<meta http-equiv="refresh" content="1;url=${esc(destination.href)}">
+</head>
+<body>
+<p>Fungura <a href="${esc(destination.href)}">Trcose Market</a>.</p>
+<script>location.replace(${JSON.stringify(destination.href)});</script>
+</body>
+</html>`;
+
+    return {
+      statusCode: 200,
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "public, max-age=60"
+      },
+      body: html
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: "Ntibyashobotse kubona amakuru. Reba Netlify logs na Supabase permissions."
+    };
+  }
+};
