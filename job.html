@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#1769ff">
 <title>Trcose — Job Portal</title>
+<meta name="application-name" content="Trcose">
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#172033}
@@ -100,11 +101,11 @@ html, body { top:0 !important; margin-top:0 !important; }
 </style>
 </head>
 <body class="job-standalone">
-<div class="jobPortalHead"><div><div class="jobPortalTitle">💼 Job Portal</div><div class="muted">Akazi, candidates n'ibizamini</div></div><div class="jobPortalActions"><button class="secondary" onclick="goToTrcoseAdmin()">🛡️ Admin</button><button class="secondary" onclick="window.open('https://wa.me/qr/SXDKDSH3MW7NO1','_blank','noopener')">💬 Support</button><label class="jobLanguageWrap" aria-label="Choose language">🌐 <select id="jobTopLanguageSelect" onchange="changeLanguage(this.value)" aria-label="Language"><option value="rw">🇷🇼 RW</option><option value="en">🇬🇧 EN</option><option value="fr">🇫🇷 FR</option><option value="sw">🇹🇿 SW</option><option value="es">🇪🇸 ES</option><option value="pt">🇵🇹 PT</option><option value="de">🇩🇪 DE</option><option value="ar">🇸🇦 AR</option></select></label><button onclick="window.location.href='index.html'">🏠 Home</button></div></div>
+<div class="jobPortalHead"><div><div class="jobPortalTitle notranslate" translate="no">💼 Job Portal</div><div class="muted">Akazi, candidates n'ibizamini</div></div><div class="jobPortalActions"><button class="secondary" onclick="goToTrcoseAdmin()">🛡️ Admin</button><button class="secondary" onclick="window.open('https://wa.me/qr/SXDKDSH3MW7NO1','_blank','noopener')">💬 Support</button><label class="jobLanguageWrap" aria-label="Choose language">🌐 <select id="jobTopLanguageSelect" onchange="changeLanguage(this.value)" aria-label="Language"><option value="rw">🇷🇼 RW</option><option value="en">🇬🇧 EN</option><option value="fr">🇫🇷 FR</option><option value="sw">🇹🇿 SW</option><option value="es">🇪🇸 ES</option><option value="pt">🇵🇹 PT</option><option value="de">🇩🇪 DE</option><option value="ar">🇸🇦 AR</option></select></label><button onclick="window.location.href='index.html'">🏠 Home</button></div></div>
 <header>
  <div class="head">
   <div class="top">
-   <div class="logo">Trcose Market 🛍️</div>
+   <div class="logo notranslate" translate="no"><span class="notranslate" translate="no">Trcose</span> Market 🛍️</div>
    <div class="topActions">
     <a class="supportTopBtn" href="https://wa.me/qr/SXDKDSH3MW7NO1" target="_blank" rel="noopener noreferrer" aria-label="Contact Trcose Support">💬 Support</a>
     <label class="topLanguageWrap" aria-label="Choose website language"><span aria-hidden="true">🌐</span><select id="topLanguageSelect" aria-label="Choose language" onchange="changeLanguage(this.value)"><option value="rw">RW</option><option value="en">EN</option><option value="fr">FR</option><option value="sw">SW</option><option value="es">ES</option><option value="pt">PT</option><option value="de">DE</option><option value="ar">AR</option></select></label>
@@ -1070,37 +1071,8 @@ ${escapeHTML(String(e.duration_minutes||0))} min · 🎯 ${escapeHTML(String(e.p
 </script>
 
 <!-- Google Translate engine is intentionally kept off-screen. Language choice is shared with Trcose Market/Job Portal. -->
-/* Hide Google Translate UI, but keep its translation engine active */
-.goog-te-banner-frame,
-.goog-te-banner-frame.skiptranslate,
-iframe.goog-te-banner-frame,
-.goog-te-balloon-frame,
-.goog-te-menu-frame,
-#goog-gt-tt,
-.goog-te-spinner-pos,
-.goog-te-gadget-icon {
-  display: none !important;
-  visibility: hidden !important;
-}
-
-html,
-body {
-  top: 0 !important;
-  margin-top: 0 !important;
-}
-
-#google_translate_element {
-  position: fixed !important;
-  left: -10000px !important;
-  top: 0 !important;
-  width: 1px !important;
-  height: 1px !important;
-  overflow: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  z-index: -1 !important;
-}
-    <script>
+<div id="google_translate_element" aria-hidden="true"></div>
+<script>
 (function(){
   const supported=['rw','en','fr','sw','es','pt','de','ar'];
   function getSavedLanguage(){
