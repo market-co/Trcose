@@ -23,11 +23,32 @@ exports.handler = async function (event) {
     "'": "&#39;"
   })[c]);
 
-  async function readTable(table, fields) {
+  function validImage(value) {
+    if (typeof value !== "string" || !value.trim()) return "";
+    try {
+      const url = new URL(value.trim());
+      if (url.protocol !== "https:" && url.protocol !== "http:") {
+        return "";
+      }
+      // Do not use a video file as the social preview image.
+      if (/\.(mp4|mov|webm|m3u8|avi)(?:$|[?#])/i.test(url.href)) {
+        return "";
+      }
+      return url.href;
+    } catch {
+      return "";
+    }
+  }
+
+  async function readTable(table, fields, filters = {}) {
     const url = new URL(`/rest/v1/${table}`, supabaseUrl);
     url.searchParams.set("select", fields);
     url.searchParams.set("id", `eq.${id}`);
     url.searchParams.set("limit", "1");
+
+    for (const [key, value] of Object.entries(filters)) {
+      url.searchParams.set(key, value);
+    }
 
     const response = await fetch(url, {
       headers: {
@@ -36,7 +57,9 @@ exports.handler = async function (event) {
       }
     });
 
-    if (!response.ok) throw new Error("Database read failed");
+    if (!response.ok) {
+      throw new Error(`Database read failed: ${table}`);
+    }
 
     const rows = await response.json();
     return rows[0] || null;
@@ -49,14 +72,24 @@ exports.handler = async function (event) {
     if (type === "job") {
       item = await readTable(
         "jobs",
-        "id,title,company,description,requirements,image_url,media_url,video_url,is_public"
+        "id,title,company,description,image_url,media_url,video_url,is_public"
       );
 
       if (!item || item.is_public !== true) {
-        return { statusCode: 404, body: "Public job not found." };
+        return {
+          statusCode: 404,
+          body: "Public job not found."
+        };
       }
 
-      image = item.image_url || item.media_url || "";
+      // Dubai Hotel: media_url may contain the actual job image
+      // even when image_url is empty.
+      image =
+        validImage(item.media_url) ||
+        validImage(item.image_url) ||
+        validImage(item.thumbnail_url) ||
+        validImage(item.video_url) ||
+        "";
     } else {
       item = await readTable(
         "products",
@@ -64,22 +97,30 @@ exports.handler = async function (event) {
       );
 
       if (!item || item.is_public === false) {
-        return { statusCode: 404, body: "Public product not found." };
+        return {
+          statusCode: 404,
+          body: "Public product not found."
+        };
       }
 
+      const imageList = Array.isArray(item.image_urls)
+        ? item.image_urls
+        : [];
+
       image =
-        item.thumbnail_url ||
-        item.image_url ||
-        (Array.isArray(item.image_urls) ? item.image_urls[0] : "") ||
-        item.media_url ||
+        validImage(item.image_url) ||
+        validImage(item.thumbnail_url) ||
+        validImage(item.media_url) ||
+        imageList.map(validImage).find(Boolean) ||
         "";
 
+      // Try product_media only when the product has no usable image.
       if (!image) {
         const url = new URL("/rest/v1/product_media", supabaseUrl);
         url.searchParams.set("select", "file_url");
         url.searchParams.set("product_id", `eq.${id}`);
         url.searchParams.set("is_public", "eq.true");
-        url.searchParams.set("limit", "1");
+        url.searchParams.set("limit", "10");
 
         const response = await fetch(url, {
           headers: {
@@ -90,7 +131,9 @@ exports.handler = async function (event) {
 
         if (response.ok) {
           const media = await response.json();
-          image = media[0]?.file_url || "";
+          image = (media || [])
+            .map(row => validImage(row.file_url))
+            .find(Boolean) || "";
         }
       }
     }
@@ -99,23 +142,21 @@ exports.handler = async function (event) {
       ? item.title || "Job kuri Trcose Market"
       : item.name || item.title || "Product kuri Trcose Market";
 
-    const rawDescription = item.description ||
-      item.requirements ||
+    const description = item.description ||
       "Reba amakuru arambuye kuri Trcose Market.";
 
-    const description = String(rawDescription).replace(/\s+/g, " ").trim();
+    // Keep the correct destination format for each type.
+    const destination = type === "job"
+      ? new URL(
+          `job.html?job=${encodeURIComponent(id)}`,
+          "https://market-co.github.io/Trcose/"
+        )
+      : new URL(
+          `index.html#?product=${encodeURIComponent(id)}`,
+          "https://market-co.github.io/Trcose/"
+        );
 
-    const destination = new URL(
-      type === "job" ? "job.html" : "index.html",
-      "https://market-co.github.io/Trcose/"
-    );
-    destination.searchParams.set(type, id);
-
-    const safeImage =
-      typeof image === "string" &&
-      /^https:\/\//i.test(image.trim())
-        ? image.trim()
-        : "";
+    const shareUrl = event.rawUrl || destination.href;
 
     const html = `<!doctype html>
 <html lang="rw">
@@ -123,27 +164,30 @@ exports.handler = async function (event) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)} | Trcose Market</title>
-<meta name="description" content="${esc(description.slice(0, 300))}">
+<meta name="description" content="${esc(description)}">
+
 <meta property="og:site_name" content="Trcose Market">
 <meta property="og:type" content="website">
 <meta property="og:title" content="${esc(title)}">
-<meta property="og:description" content="${esc(description.slice(0, 300))}">
-<meta property="og:url" content="${esc(destination.href)}">
-${safeImage ? `
-<meta property="og:image" content="${esc(safeImage)}">
-<meta property="og:image:secure_url" content="${esc(safeImage)}">
-<meta property="og:image:type" content="image/png">
-<meta name="twitter:image" content="${esc(safeImage)}">
+<meta property="og:description" content="${esc(description)}">
+<meta property="og:url" content="${esc(shareUrl)}">
+<meta property="og:locale" content="rw_RW">
+${image ? `
+<meta property="og:image" content="${esc(image)}">
+<meta property="og:image:secure_url" content="${esc(image)}">
+<meta name="twitter:image" content="${esc(image)}">
 ` : ""}
-<meta name="twitter:card" content="${safeImage ? "summary_large_image" : "summary"}">
+<meta name="twitter:card" content="${image ? "summary_large_image" : "summary"}">
 <meta name="twitter:title" content="${esc(title)}">
-<meta name="twitter:description" content="${esc(description.slice(0, 300))}">
+<meta name="twitter:description" content="${esc(description)}">
+
+<meta http-equiv="refresh" content="1;url=${esc(destination.href)}">
 </head>
 <body>
-<h1>${esc(title)}</h1>
-<p>${esc(description)}</p>
-${safeImage ? `<img src="${esc(safeImage)}" alt="${esc(title)}" style="max-width:100%;height:auto">` : ""}
-<p><a href="${esc(destination.href)}">Fungura kuri Trcose Market</a></p>
+<p>Urimo gufungura <a href="${esc(destination.href)}">Trcose Market</a>...</p>
+<script>
+  location.replace(${JSON.stringify(destination.href)});
+</script>
 </body>
 </html>`;
 
@@ -151,8 +195,7 @@ ${safeImage ? `<img src="${esc(safeImage)}" alt="${esc(title)}" style="max-width
       statusCode: 200,
       headers: {
         "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, max-age=0, must-revalidate",
-        "X-Content-Type-Options": "nosniff"
+        "Cache-Control": "public, max-age=60"
       },
       body: html
     };
@@ -161,7 +204,10 @@ ${safeImage ? `<img src="${esc(safeImage)}" alt="${esc(title)}" style="max-width
 
     return {
       statusCode: 500,
-      headers: { "Content-Type": "text/plain; charset=utf-8" },
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-store"
+      },
       body: "Ntibyashobotse kubona amakuru. Reba Netlify logs na Supabase permissions."
     };
   }
