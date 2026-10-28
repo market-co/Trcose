@@ -1,5 +1,4 @@
 
-
 exports.handler = async function (event) {
   const params = event.queryStringParameters || {};
   const type = params.type === "job" ? "job" : "product";
@@ -17,19 +16,18 @@ exports.handler = async function (event) {
   }
 
   const esc = value => String(value || "").replace(/[&<>"']/g, c => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;",
-    '"': "&quot;", "'": "&#39;"
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
   })[c]);
 
-  async function readTable(table, fields, filters = {}) {
+  async function readTable(table, fields) {
     const url = new URL(`/rest/v1/${table}`, supabaseUrl);
     url.searchParams.set("select", fields);
     url.searchParams.set("id", `eq.${id}`);
     url.searchParams.set("limit", "1");
-
-    for (const [key, value] of Object.entries(filters)) {
-      url.searchParams.set(key, value);
-    }
 
     const response = await fetch(url, {
       headers: {
@@ -39,6 +37,7 @@ exports.handler = async function (event) {
     });
 
     if (!response.ok) throw new Error("Database read failed");
+
     const rows = await response.json();
     return rows[0] || null;
   }
@@ -50,7 +49,7 @@ exports.handler = async function (event) {
     if (type === "job") {
       item = await readTable(
         "jobs",
-        "id,title,company,description,image_url,media_url,video_url,is_public"
+        "id,title,company,description,requirements,image_url,media_url,video_url,is_public"
       );
 
       if (!item || item.is_public !== true) {
@@ -100,14 +99,23 @@ exports.handler = async function (event) {
       ? item.title || "Job kuri Trcose Market"
       : item.name || item.title || "Product kuri Trcose Market";
 
-    const description = item.description ||
+    const rawDescription = item.description ||
+      item.requirements ||
       "Reba amakuru arambuye kuri Trcose Market.";
 
+    const description = String(rawDescription).replace(/\s+/g, " ").trim();
+
     const destination = new URL(
-      type === "job" ? "job.html" : "",
+      type === "job" ? "job.html" : "index.html",
       "https://market-co.github.io/Trcose/"
     );
     destination.searchParams.set(type, id);
+
+    const safeImage =
+      typeof image === "string" &&
+      /^https:\/\//i.test(image.trim())
+        ? image.trim()
+        : "";
 
     const html = `<!doctype html>
 <html lang="rw">
@@ -115,21 +123,27 @@ exports.handler = async function (event) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)} | Trcose Market</title>
-<meta name="description" content="${esc(description)}">
+<meta name="description" content="${esc(description.slice(0, 300))}">
 <meta property="og:site_name" content="Trcose Market">
 <meta property="og:type" content="website">
 <meta property="og:title" content="${esc(title)}">
-<meta property="og:description" content="${esc(description)}">
-<meta property="og:url" content="${esc(event.rawUrl || "")}">
-${image && /^https?:\/\//i.test(image)
-  ? `<meta property="og:image" content="${esc(image)}">`
-  : ""}
-<meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="refresh" content="1;url=${esc(destination.href)}">
+<meta property="og:description" content="${esc(description.slice(0, 300))}">
+<meta property="og:url" content="${esc(destination.href)}">
+${safeImage ? `
+<meta property="og:image" content="${esc(safeImage)}">
+<meta property="og:image:secure_url" content="${esc(safeImage)}">
+<meta property="og:image:type" content="image/png">
+<meta name="twitter:image" content="${esc(safeImage)}">
+` : ""}
+<meta name="twitter:card" content="${safeImage ? "summary_large_image" : "summary"}">
+<meta name="twitter:title" content="${esc(title)}">
+<meta name="twitter:description" content="${esc(description.slice(0, 300))}">
 </head>
 <body>
-<p>Fungura <a href="${esc(destination.href)}">Trcose Market</a>.</p>
-<script>location.replace(${JSON.stringify(destination.href)});</script>
+<h1>${esc(title)}</h1>
+<p>${esc(description)}</p>
+${safeImage ? `<img src="${esc(safeImage)}" alt="${esc(title)}" style="max-width:100%;height:auto">` : ""}
+<p><a href="${esc(destination.href)}">Fungura kuri Trcose Market</a></p>
 </body>
 </html>`;
 
@@ -137,13 +151,17 @@ ${image && /^https?:\/\//i.test(image)
       statusCode: 200,
       headers: {
         "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, max-age=60"
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "X-Content-Type-Options": "nosniff"
       },
       body: html
     };
   } catch (error) {
+    console.error("Share function error:", error);
+
     return {
       statusCode: 500,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
       body: "Ntibyashobotse kubona amakuru. Reba Netlify logs na Supabase permissions."
     };
   }
