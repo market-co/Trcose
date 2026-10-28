@@ -7,7 +7,15 @@
 <meta name="google-site-verification" content="1INuEOCUMyd_z8wVb7xFbtmvDiZ5Hg9AheqauJsDdH4" />
     <title>Trcose Market</title>
 <meta name="application-name" content="Trcose">
-<meta name="description" content="Trcose — marketplace, jobs, business tools and online exams.">
+<meta name="description" content="Trcose Market — marketplace, jobs, business tools and online exams.">
+<meta property="og:site_name" content="Trcose Market">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Trcose Market">
+<meta property="og:description" content="Discover products, videos, jobs and business tools on Trcose Market.">
+<meta property="og:url" content="https://market-co.github.io/Trcose/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Trcose Market">
+<meta name="twitter:description" content="Discover products, videos, jobs and business tools on Trcose Market.">
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#172033}
@@ -154,14 +162,20 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
  <div id="products" class="grid"></div>
 
  <section class="videoFeed" aria-labelledby="freeVideoTitle">
-  <h2 id="freeVideoTitle">🎬 Shyiraho Video</h2>
-  <p class="muted">Shyiraho video yawe, abandi bayirebe kandi bayikurikire.</p>
-  <div class="videoComposer">
+  <h2 id="freeVideoTitle">🎬 Video Posts</h2>
+  <p class="muted">Reba video za Trcose Market, ukurikire abashyiraho content kandi ubisangize abandi.</p>
+  <button id="videoToolsToggle" type="button" onclick="toggleVideoTools()">✨ Get More Views / Follow / Get Monetized</button>
+  <div id="videoToolsPanel" class="videoComposer hidden">
+   <h3>📤 Shyiraho Video</h3>
    <input id="videoPostName" maxlength="100" placeholder="Umutwe wa video">
    <textarea id="videoPostDescription" maxlength="1500" placeholder="Ibisobanuro bigufi (si ngombwa)"></textarea>
-   <input id="videoPostFile" type="file" accept="video/*">
-   <p class="muted">Hitamo video itarengeje 100 MB.</p>
-   <button onclick="publishFreeVideoPost()">📤 Shyiraho Video</button>
+   <label for="videoPostFile">Hitamo video</label><input id="videoPostFile" type="file" accept="video/*">
+   <label for="videoThumbnailFile">Thumbnail (si ngombwa)</label><input id="videoThumbnailFile" type="file" accept="image/png,image/jpeg,image/webp,image/*">
+   <p class="muted">Nudahitemo thumbnail, Trcose izagerageza gufata ifoto iri hagati muri video.</p>
+   <button onclick="publishFreeVideoPost()">📤 Publish Video</button>
+   <button class="secondary" onclick="showPage('profile')">👤 Profile & Followers</button>
+   <button class="secondary" onclick="showPage('monetization')">💰 Get Monetized</button>
+   <button class="secondary" onclick="toggleVideoTools(false)">Funga ibikoresho</button>
    <p id="videoPostMessage" class="muted" role="status"></p>
   </div>
   <div id="videoPosts"><p class="muted">Turimo gushaka video posts...</p></div>
@@ -308,7 +322,7 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
    <div><b>Profile picture</b><input id="profilePhoto" type="file" accept="image/*" onchange="previewProfilePhoto(event)">
    <small class="muted">Hitamo ifoto yo kuri telefone.</small></div>
   </div>
-  <input id="profileName" data-i18n-placeholder="full_name" placeholder="Amazina"><input id="profileEmail" placeholder="Email">
+  <input id="profileName" class="notranslate" translate="no" data-i18n-placeholder="full_name" placeholder="Amazina"><input id="profileEmail" placeholder="Email">
   <input id="profilePhone" placeholder="Phone"><input id="profileCity" placeholder="Aho uherereye">
   <textarea id="profileAbout" placeholder="About"></textarea>
   <div class="stats" style="margin-top:12px">
@@ -316,6 +330,8 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
    <div class="stat">➡️ Following<br><b id="profileFollowingCount">0</b></div>
   </div>
   <p class="muted">Imibare ivugururwa iva muri Supabase. Followers ni abantu bagukurikira kuri Trcose Market.</p>
+  <div class="panel"><h3>👥 Abantu bangukurikira</h3><button class="secondary" onclick="loadProfileFollowers()">Reba / Refresh Followers</button><div id="profileFollowerList" class="muted">Kanda kugira ngo urebe abagukurikira.</div></div>
+  <div class="panel"><h3>🎬 Posts zanjye</h3><button class="secondary" onclick="loadMyPosts()">Refresh posts zanjye</button><div id="profileMyPosts" class="muted">Posts zawe zizagaragara hano.</div></div>
   <div class="profileVideoStats"><h3>🎬 Video Posts — Public Statistics</h3><div class="stats"><div class="stat">🎬 Video Posts<br><b id="profileVideoCount">0</b></div><div class="stat">👀 Views<br><b id="profileVideoViews">0</b></div><div class="stat">❤️ Likes<br><b id="profileVideoLikes">0</b></div><div class="stat">💬 Comments<br><b id="profileVideoComments">0</b></div><div class="stat">↗️ Shares<br><b id="profileVideoShares">0</b></div></div><p class="muted">Iyi mibare ireba video posts zawe gusa; ibicuruzwa bisanzwe ntibihindurwa.</p></div>
   <button onclick="saveProfile()">💾 Bika Profile</button><p id="profileMessage" class="muted"></p>
  </div>
@@ -416,6 +432,8 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
    
      <button class="secondary" onclick="showAdminTab('revenue')">💰 Revenue</button>
   <button class="secondary" onclick="showAdminTab('managers')">👥 Manager approvals</button>
+  <button class="secondary" onclick="showAdminTab('users')">🔐 Users & Activity</button>
+  <button class="secondary" onclick="showAdminTab('content')">🧹 Posts & Jobs</button>
   <button class="secondary" onclick="openAdminAd()">📢 New Ad</button>
  </div>
  <div class="panel"><button onclick="loadAdminPayments()">🔄 Refresh</button> <button class="secondary" onclick="showPage('home')">🏠 Home</button></div>
@@ -442,6 +460,8 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
   <button class="secondary" onclick="loadAdminManagerRequests()">🔄 Refresh requests</button>
   <div id="adminManagerList"><p class="muted">Kanda Refresh requests.</p></div>
  </div>
+ <div id="adminUsersSection" class="panel hidden"><h3>🔐 Users & Activity</h3><p class="muted">Iyi tab igaragara ku ma-email yemewe gusa. “Recent activity” ni ibikorwa byanditswe muri product_events; si igipimo nyacyo cya online presence.</p><div class="stats"><div class="stat">🟢 Online now<br><b id="adminOnlineUsers">—</b></div><div class="stat">👥 Users<br><b id="adminUsersCount">—</b></div><div class="stat">🛍️ Products<br><b id="adminProductsCount">—</b></div><div class="stat">⚡ Recent events<br><b id="adminRecentEvents">—</b></div><div class="stat">💼 Jobs<br><b id="adminJobsCount">—</b></div></div><button class="secondary" onclick="loadAdminUsers()">🔄 Refresh users / activity</button><div id="adminUsersList"></div></div>
+ <div id="adminContentSection" class="panel hidden"><h3>🧹 Manage Posts & Jobs</h3><p class="muted">Guhisha cyangwa gusiba bikenera Supabase RLS policies zemerera admin; niba policy itabihaye uburenganzira, igikorwa kiranga kandi amakuru akagumana umutekano.</p><button class="secondary" onclick="loadAdminContent()">🔄 Refresh content</button><div id="adminContentList"></div><hr><h4>💬 Comments moderation</h4><button class="secondary" onclick="loadAdminComments()">Refresh comments</button><div id="adminCommentsList"></div></div>
     
 </section>
 </main>
@@ -502,6 +522,15 @@ const SUPABASE_PUBLISHABLE_KEY="sb_publishable_aGs2zQzGZxOJYfuEznsvsQ_hyCkIXzY";
 const ZUNIVO_ADMIN_EMAILS=["jnisingizwimana@gmail.com","hakizakwizerajeanbaptiste8@gmail.com"].map(email=>String(email).toLowerCase().trim());
 const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 let user=null,products=[],paymentPurpose=null,selectedProduct=null,productMediaType="image",productMediaFile=null,activeChatUserId=null,activeChatProductId=null;
+let trcosePresenceChannel=null;
+async function startTrcosePresence(){
+ try{
+  if(trcosePresenceChannel){try{await supabaseClient.removeChannel(trcosePresenceChannel)}catch(e){}trcosePresenceChannel=null}
+  let sessionKey="";try{sessionKey=sessionStorage.getItem("trcose_presence_key")||"";if(!sessionKey){sessionKey="session-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,10);sessionStorage.setItem("trcose_presence_key",sessionKey)}}catch(e){sessionKey="session-"+Math.random().toString(36).slice(2,10)}
+  trcosePresenceChannel=supabaseClient.channel("trcose-online-presence",{config:{presence:{key:sessionKey}}});
+  trcosePresenceChannel.on("presence",{event:"sync"},()=>{if($("adminOnlineUsers")&&trcosePresenceChannel){const state=trcosePresenceChannel.presenceState();const count=Object.values(state||{}).reduce((n,arr)=>n+(Array.isArray(arr)?arr.length:0),0);$("adminOnlineUsers").textContent=String(count)}}).subscribe(async status=>{if(status==="SUBSCRIBED"){try{await trcosePresenceChannel.track({authenticated:!!user,seen_at:new Date().toISOString()})}catch(e){}}});
+ }catch(e){if($("adminOnlineUsers"))$("adminOnlineUsers").textContent="—";console.warn("Realtime presence unavailable",e)}
+}
 const demoProducts=[
 {id:"demo1",name:"Smartphone",description:"Smartphone nziza",price:120000,city:"Kigali",category:"Telefone",image_url:"https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=900",status:"active"},
 {id:"demo2",name:"Inkweto",description:"Inkweto nshya",price:25000,city:"Kigali",category:"Imyenda",image_url:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=900",status:"active"}];
@@ -523,6 +552,7 @@ function openStandaloneJobs(){window.open("job.html","_blank","noopener")}
 function openNotifications(){$("notificationModal").classList.add("show")}
 function protectedPage(page){if(!user){openAuth();return}showPage(page)}
 function showPage(page){
+ if(page==="admin"&&(!user||!ZUNIVO_ADMIN_EMAILS.includes(String(user.email||"").toLowerCase().trim()))){alert("Iyi dashboard igenewe Admin wa Trcose gusa.");return}
  document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));
  const el=$(page+"Page");if(el)el.classList.remove("hidden");
  document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
@@ -534,14 +564,15 @@ function showPage(page){
  if(page==="referral")loadReferralDashboard();
  if(page==="inbox")loadConversations();
  if(page==="businessManager")loadBusinessManagerDashboard();
+ if(page==="profile"){if(user){loadProfileFollowers();loadMyPosts();loadFollowStats()}}
 }
 function setLoginLoading(on){$("authMessage").textContent=on?"Turimo gutunganya...":$("authMessage").textContent}
 async function isTrcoseAdmin(){return !!user&&ZUNIVO_ADMIN_EMAILS.includes(String(user.email||"").toLowerCase().trim())}
 async function updateAdminUI(){$("adminNavBtn").style.display=await isTrcoseAdmin()?"block":"none"}
 async function refreshUser(){const {data}=await supabaseClient.auth.getUser();user=data.user||null;await updateAdminUI();if(user){await loadProfile();await loadWallet()}}
 async function init(){
- const {data}=await supabaseClient.auth.getSession();user=data.session?.user||null;await updateAdminUI();
- supabaseClient.auth.onAuthStateChange((event,session)=>{user=session?.user||null;if(event==="PASSWORD_RECOVERY"){$("passwordRecoveryModal")?.classList.add("show");closeAuth()}setTimeout(async()=>{await updateAdminUI();if(user){await loadProfile();await loadFollowStats()}renderProducts();loadFreeVideoPosts()},0)});
+ const {data}=await supabaseClient.auth.getSession();user=data.session?.user||null;await updateAdminUI();startTrcosePresence();
+ supabaseClient.auth.onAuthStateChange((event,session)=>{const nextUser=session?.user||null;const presenceIdentityChanged=(user?.id||null)!==(nextUser?.id||null);user=nextUser;if(presenceIdentityChanged)startTrcosePresence();if(event==="PASSWORD_RECOVERY"){$("passwordRecoveryModal")?.classList.add("show");closeAuth()}setTimeout(async()=>{await updateAdminUI();if(user){await loadProfile();await loadFollowStats();await loadProfileFollowers();await loadMyPosts()}renderProducts();loadFreeVideoPosts()},0)});
  await loadProducts();renderProducts();if(user){await loadProfile();await refreshJobAccess();await refreshExamAccess()}
  // Open a product when someone visits a shared Trcose link such as ?product=UUID.
  try{const sharedProductId=new URLSearchParams(window.location.search).get("product");if(sharedProductId){const sharedProduct=products.find(p=>String(p.id)===String(sharedProductId))||demoProducts.find(p=>String(p.id)===String(sharedProductId));if(sharedProduct){await openProduct(sharedProductId)}else{const details=$("productDetails");if(details)details.innerHTML="<div class='notice'>Iki gicuruzwa ntikiboneka kuri public cyangwa link si yo.</div>"}}}catch(e){console.warn("Shared product link error",e)}
@@ -627,11 +658,11 @@ async function loadProducts(){
 }
 function renderProducts(){
  const q=($("searchBox")?.value||"").toLowerCase().trim();
- const list=(products.length?products:demoProducts).filter(p=>!q||[p.name,p.category,p.city,p.description].join(" ").toLowerCase().includes(q));
+ const list=(products.length?products:demoProducts).filter(p=>String(p.category||"").toLowerCase()!=="video").filter(p=>!q||[p.name,p.category,p.city,p.description].join(" ").toLowerCase().includes(q));
  $("products").innerHTML=list.length?list.map(p=>`
  <article class="card">
-  ${p.media_type==="video"&&p.media_url?`<video class="media" controls src="${escapeHTML(p.media_url)}"></video>`:`<img class="media" loading="lazy" src="${escapeHTML(p.image_url||p.media_url||"https://via.placeholder.com/600x400?text=Trcose")}" alt="">`}
-  <div class="body"><span class="badge">${escapeHTML(p.category||"Ibindi")}</span><h3>${escapeHTML(p.name)}</h3><div class="price">${money(p.price)}</div>
+  ${p.media_type==="video"&&(p.media_url||p.image_url)?`<video class="media" controls src="${escapeHTML(p.media_url||p.image_url)}"></video>`:`<img class="media" loading="lazy" src="${escapeHTML(p.image_url||p.media_url||"https://via.placeholder.com/600x400?text=Trcose")}" alt="">`}
+  <div class="body"><span class="badge">${escapeHTML(p.category||"Ibindi")}</span><h3 class="notranslate" translate="no">${escapeHTML(p.name)}</h3><div class="price">${money(p.price)}</div>
   <p>${escapeHTML(p.description||"")}</p><p class="muted">📍 ${escapeHTML(p.city||"")}</p>
   <div id="seller-${p.id}" class="productSeller" onclick="openSellerProfile('${escapeHTML(p.seller_id||"")}')"><span class="muted">Seller profile</span></div>
   <div class="actionRow"><button onclick="openProduct('${p.id}')">👀 View</button><button class="secondary" onclick="likeProduct('${p.id}')">❤️ Like</button><button class="secondary" onclick="buyProduct('${p.id}')">🛒 Buy</button><button class="secondary" onclick="shareProduct('${p.id}')">↗️ Share</button><button class="secondary" onclick="messageSeller('${escapeHTML(p.seller_id||"")}')">💬 Chat</button></div>
@@ -641,7 +672,7 @@ function renderProducts(){
 async function openProduct(id){
  const p=products.find(x=>x.id===id)||demoProducts.find(x=>x.id===id);if(!p)return;selectedProduct=p;
  $("productDetails").innerHTML=`
- ${p.media_type==="video"&&p.media_url?`<video class="media" controls src="${escapeHTML(p.media_url)}"></video>`:`<img class="media" src="${escapeHTML(p.image_url||p.media_url||"https://via.placeholder.com/600x400?text=Trcose")}" alt="">`}
+ ${p.media_type==="video"&&(p.media_url||p.image_url)?`<video class="media" controls src="${escapeHTML(p.media_url||p.image_url)}"></video>`:`<img class="media" src="${escapeHTML(p.image_url||p.media_url||"https://via.placeholder.com/600x400?text=Trcose")}" alt="">`}
  <h2>${escapeHTML(p.name)}</h2><div class="price">${money(p.price)}</div><p>${escapeHTML(p.description||"")}</p><p class="muted">📍 ${escapeHTML(p.city||"")}</p>
  <div id="sellerMini-${p.id}" class="productSeller" onclick="openSellerProfile('${escapeHTML(p.seller_id||"")}')"></div>
  <div class="actionRow"><button onclick="buyProduct('${p.id}')">🛒 Buy</button><button class="secondary" onclick="likeProduct('${p.id}')">❤️ Like</button><button class="secondary" onclick="shareProduct('${p.id}')">↗️ Share</button><button class="secondary" onclick="messageSeller('${escapeHTML(p.seller_id||"")}')">✉️ Inbox</button></div>
@@ -667,7 +698,7 @@ async function shareItem(title,url){
  const copied=await copyTextFallback(String(url));
  alert(copied?"Link yakopiwe. Ushobora kuyishyira muri WhatsApp cyangwa ahandi.":"Ntibyashobotse gukopa link. Yifungure muri address bar uyikopore.");
 }
-function shareProduct(id){const p=products.find(x=>String(x.id)===String(id))||demoProducts.find(x=>String(x.id)===String(id));if(p)shareItem(p.name||"Trcose Product",location.href.split("?")[0]+"?product="+encodeURIComponent(id))}
+function shareProduct(id){const p=products.find(x=>String(x.id)===String(id))||demoProducts.find(x=>String(x.id)===String(id));if(p)shareItem((p.name||"Trcose Product")+" — Trcose Market",location.href.split("?")[0]+"?product="+encodeURIComponent(id))}
 async function shareVideoPost(id){try{await supabaseClient.from("product_events").insert({product_id:id,event_type:"share",user_id:user?.id||null})}catch(e){} const p=products.find(x=>x.id===id);if(p)shareItem(p.name||"Trcose Video",location.href.split("?")[0]+"?product="+encodeURIComponent(id));await loadFreeVideoPosts();if(user)await loadMyVideoStats()}
 function shareReferral(){const c=$("myReferralCode")?.textContent?.trim()||"";shareItem("Trcose Referral "+c,location.href.split("?")[0]+"?ref="+encodeURIComponent(c))}
 
@@ -858,11 +889,11 @@ async function openSellerProfile(sellerId){
  if(!sellerId||String(sellerId).startsWith("demo")){$("sellerDetails").innerHTML='<div class="panel"><h3>Seller</h3><p class="muted">Profile ntiboneka kuri demo product.</p></div>';$("sellerModal").classList.add("show");return}
  const {data:p,error}=await supabaseClient.from("profiles").select("id,name,email,phone,city,about,avatar_url").eq("id",sellerId).maybeSingle();
  if(error){$("sellerDetails").innerHTML=`<div class="error">${escapeHTML(error.message)}</div>`;return}
- $("sellerDetails").innerHTML=`<div class="sellerModalHead"><img src="${escapeHTML(p?.avatar_url||"https://via.placeholder.com/120x120?text=T")}"><div><h2 style="margin:0">${escapeHTML(p?.name||"Trcose Seller")}</h2><div class="muted">${escapeHTML(p?.city||"")}</div></div></div><p>${escapeHTML(p?.about||"Nta bisobanuro bya seller.")}</p><button onclick="messageSeller('${escapeHTML(sellerId)}')">💬 Andikira Inbox</button>`;$("sellerModal").classList.add("show")
+ $("sellerDetails").innerHTML=`<div class="sellerModalHead"><img src="${escapeHTML(p?.avatar_url||"https://via.placeholder.com/120x120?text=T")}"><div><h2 class="notranslate" translate="no" style="margin:0">${escapeHTML(p?.name||"Trcose Seller")}</h2><div class="muted">${escapeHTML(p?.city||"")}</div></div></div><p>${escapeHTML(p?.about||"Nta bisobanuro bya seller.")}</p><button onclick="messageSeller('${escapeHTML(sellerId)}')">💬 Andikira Inbox</button>`;$("sellerModal").classList.add("show")
 }
 async function hydrateSellerMini(sellerId,targetId){
  if(!sellerId||String(sellerId).startsWith("demo"))return;const {data}=await supabaseClient.from("profiles").select("name,avatar_url,city").eq("id",sellerId).maybeSingle();const el=$(targetId);
- if(el&&data)el.innerHTML=`<img src="${escapeHTML(data.avatar_url||"https://via.placeholder.com/80x80?text=T")}" alt=""><div><div class="sellerMini">${escapeHTML(data.name||"Seller")}</div><div class="muted">${escapeHTML(data.city||"")}</div></div>`
+ if(el&&data)el.innerHTML=`<img src="${escapeHTML(data.avatar_url||"https://via.placeholder.com/80x80?text=T")}" alt=""><div><div class="sellerMini notranslate" translate="no">${escapeHTML(data.name||"Seller")}</div><div class="muted">${escapeHTML(data.city||"")}</div></div>`
 }
 async function hydrateProductSellers(){for(const p of products||[]){if(p.seller_id)await hydrateSellerMini(p.seller_id,"seller-"+p.id)}}
 async function messageSeller(sellerId){
@@ -913,26 +944,65 @@ function hidePhoneNumbers(value){
    return digits.length>=9 ? "••••••••" : match;
  });
 }
+function toggleVideoTools(force){
+ const panel=$("videoToolsPanel");if(!panel)return;
+ if(force===false)panel.classList.add("hidden");else panel.classList.toggle("hidden");
+ if(!panel.classList.contains("hidden"))panel.scrollIntoView({behavior:"smooth",block:"start"});
+}
+async function uploadVideoThumbnail(file,userId){
+ if(!file)return "";
+ const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
+ const path=`public-posts/${userId}/thumbnail-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+ const {error}=await supabaseClient.storage.from("product-videos").upload(path,file,{upsert:false,contentType:file.type||"image/jpeg"});
+ if(error)throw error;
+ return supabaseClient.storage.from("product-videos").getPublicUrl(path).data.publicUrl;
+}
+async function captureMiddleVideoThumbnail(file){
+ return new Promise(resolve=>{
+  let objectUrl="";const video=document.createElement("video");video.muted=true;video.playsInline=true;video.preload="metadata";
+  const cleanup=()=>{video.removeAttribute("src");try{video.load()}catch(e){};if(objectUrl)URL.revokeObjectURL(objectUrl)};
+  const done=url=>{cleanup();resolve(url||"")};
+  video.onerror=()=>done("");
+  video.onloadedmetadata=()=>{try{const d=Number(video.duration);video.currentTime=Number.isFinite(d)&&d>1?d*0.5:0.1}catch(e){done("")}};
+  video.onseeked=()=>{try{const w=video.videoWidth,h=video.videoHeight;if(!w||!h){done("");return}const canvas=document.createElement("canvas");canvas.width=Math.min(w,720);canvas.height=Math.max(1,Math.round(canvas.width*h/w));const ctx=canvas.getContext("2d");if(!ctx){done("");return}ctx.drawImage(video,0,0,canvas.width,canvas.height);canvas.toBlob(blob=>done(blob?new File([blob],"video-thumbnail.jpg",{type:"image/jpeg"}):""),"image/jpeg",0.86)}catch(e){done("")}};
+  try{objectUrl=URL.createObjectURL(file);video.src=objectUrl}catch(e){done("")}
+ });
+}
 async function publishFreeVideoPost(){
  const box=$("videoPostMessage");
  if(!user){openAuth();return}
- const name=$("videoPostName").value.trim(), description=$("videoPostDescription").value.trim(), file=$("videoPostFile").files?.[0];
- if(!name||!file){box.textContent="Andika izina rya post uhitemo na video.";return}
+ const name=$("videoPostName").value.trim(),description=$("videoPostDescription").value.trim(),file=$("videoPostFile").files?.[0],chosenThumb=$("videoThumbnailFile")?.files?.[0];
+ if(!name||!file){box.textContent="Andika umutwe wa video, uhitemo na video.";return}
  if(!file.type.startsWith("video/")){box.textContent="Hitamo file ya video gusa.";return}
- if(file.size>100*1024*1024){box.textContent="Video irenze 100 MB. Hitamo ntoya.";return}
- box.textContent="Turimo kohereza video... tegereza.";
+ if(file.size>50*1024*1024){box.textContent="Video irenze umupaka wa 50 MB wa Supabase. Hitamo ntoya.";return}
+ const publishBtn=document.querySelector('#videoToolsPanel button[onclick="publishFreeVideoPost()"]');if(publishBtn){publishBtn.disabled=true;publishBtn.textContent="⏳ Turimo kohereza..."}
+ box.textContent="Turimo kohereza video; ntufunge uru rupapuro kugeza birangiye.";
+ let videoPath="";
  try{
-  const ext=(file.name.split(".").pop()||"mp4").toLowerCase();
-  const path=`public-posts/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-  const {error:uploadError}=await supabaseClient.storage.from("product-videos").upload(path,file,{upsert:false});
+  const ext=(file.name.split(".").pop()||"mp4").toLowerCase();videoPath=`public-posts/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const {error:uploadError}=await supabaseClient.storage.from("product-videos").upload(videoPath,file,{upsert:false,contentType:file.type||undefined});
   if(uploadError)throw uploadError;
-  const url=supabaseClient.storage.from("product-videos").getPublicUrl(path).data.publicUrl;
-  const {error}=await supabaseClient.from("products").insert({seller_id:user.id,name,description,price:0,city:"",category:"Video",image_url:url,media_type:"video",media_text:null,status:"active"});
+  const videoUrl=supabaseClient.storage.from("product-videos").getPublicUrl(videoPath).data.publicUrl;
+  let thumbnailUrl="";
+  try{
+   let thumbFile=chosenThumb;
+   if(!thumbFile){box.textContent="Video yoherejwe. Turimo kugerageza gukora thumbnail yo hagati...";thumbFile=await captureMiddleVideoThumbnail(file)}
+   if(thumbFile)thumbnailUrl=await uploadVideoThumbnail(thumbFile,user.id);
+  }catch(thumbError){console.warn("Video thumbnail fallback",thumbError);}
+  const videoRow={seller_id:user.id,name,description,price:0,city:"",category:"Video",image_url:videoUrl,media_type:"video",media_text:null,status:"active"};
+  if(thumbnailUrl)videoRow.thumbnail_url=thumbnailUrl;
+  let {data,error}=await supabaseClient.from("products").insert(videoRow).select("id").single();
+  if(error&&thumbnailUrl&&/thumbnail_url|column .* does not exist|schema cache/i.test(error.message||"")){
+   delete videoRow.thumbnail_url;
+   const retry=await supabaseClient.from("products").insert(videoRow).select("id").single();data=retry.data;error=retry.error;
+  }
   if(error)throw error;
-  $("videoPostName").value="";$("videoPostDescription").value="";$("videoPostFile").value="";
-  box.textContent="Video yashyizwe ku rubuga.";
-  await loadProducts();renderProducts();await loadFreeVideoPosts();
- }catch(e){box.textContent="Ntibyashobotse: "+(e?.message||"Reba product-videos bucket, products columns na Supabase RLS policies.");}
+  $("videoPostName").value="";$("videoPostDescription").value="";$("videoPostFile").value="";if($("videoThumbnailFile"))$("videoThumbnailFile").value="";
+  box.textContent=thumbnailUrl?"Video yashyizwe public kandi thumbnail irahari.":"Video yashyizwe public. Browser cyangwa Storage ntiyashoboye gukora thumbnail; video iracyakora kandi ushobora kongera kugerageza thumbnail.";
+  await loadProducts();renderProducts();await loadFreeVideoPosts();await loadMyPosts();await loadMyVideoStats();
+  if(data?.id){try{history.replaceState(null,"",location.pathname+"?product="+encodeURIComponent(data.id))}catch(e){}}
+ }catch(e){box.textContent="Ntibyashobotse gushyira video public: "+(e?.message||"Reba product-videos bucket, products columns na Supabase RLS policies.");}
+ finally{if(publishBtn){publishBtn.disabled=false;publishBtn.textContent="📤 Publish Video"}}
 }
 async function getFollowCount(userId){
  if(!userId)return 0;
@@ -952,7 +1022,7 @@ async function loadFollowStats(){
 }
 async function loadMyVideoStats(){
  if(!user)return;
- const idsResult=await supabaseClient.from("products").select("id").eq("seller_id",user.id).eq("category","Video").eq("status","active");
+ const idsResult=await supabaseClient.from("products").select("id").eq("seller_id",user.id).eq("category","Video");
  if(idsResult.error){["profileVideoCount","profileVideoViews","profileVideoLikes","profileVideoComments","profileVideoShares"].forEach(id=>{if($(id))$(id).textContent="—"});return}
  const ids=(idsResult.data||[]).map(x=>x.id);
  if($("profileVideoCount"))$("profileVideoCount").textContent=String(ids.length);
@@ -999,17 +1069,40 @@ async function loadFreeVideoPosts(){
   ]);
   const followLabel=(user&&p.seller_id===user.id)?"👤 You":(following?"✓ Following":"➕ Follow");
   return `<article class="videoPost">
-   <video controls playsinline preload="metadata" src="${escapeHTML(p.media_url||p.image_url||"")}" onplay="recordVideoPostView('${String(p.id).replace(/'/g,"\\'")}')"></video>
-   <div class="body"><h3>${escapeHTML(hidePhoneNumbers(p.name||"Video post"))}</h3><p>${escapeHTML(hidePhoneNumbers(p.description||""))}</p>
+   <video controls playsinline preload="metadata" poster="${escapeHTML(p.thumbnail_url||"")}" src="${escapeHTML(p.media_url||p.image_url||"")}" onplay="recordVideoPostView('${String(p.id).replace(/'/g,"\\'")}')"></video>
+   <div class="body"><h3 class="notranslate" translate="no">${escapeHTML(hidePhoneNumbers(p.name||"Video post"))}</h3><p>${escapeHTML(hidePhoneNumbers(p.description||""))}</p>
    <p class="phoneMasked">🔒 Numero zishobora guhishwa mu nyandiko igaragara; ntibikuraho numero ziri muri video ubwayo.</p>
    <p class="muted">🌐 PUBLIC · 👀 ${views.count||0} views · ❤️ ${likes.count||0} likes · 💬 ${comments.count||0} comments · ↗️ ${shares.count||0} shares · 👥 ${followers===null?"—":followers} followers</p>
    <div class="actionRow"><button onclick="openProduct('${String(p.id).replace(/'/g,"\\'")}')">👀 View / Comment</button><button class="secondary" onclick="likeProduct('${String(p.id).replace(/'/g,"\\'")}')">❤️ Like</button><button class="secondary" onclick="shareVideoPost('${String(p.id).replace(/'/g,"\\'")}')">↗️ Share</button>
    ${p.seller_id&&(!user||p.seller_id!==user.id)?`<button class="secondary" onclick="toggleFollowUser('${String(p.seller_id).replace(/'/g,"\\'")}')">${followLabel}</button>`:""}
-   ${user&&p.seller_id===user.id?`<button class="danger" onclick="deleteMyProduct('${String(p.id).replace(/'/g,"\\'")}')">🗑️ Delete</button>`:""}</div></div></article>`;
+   ${user&&p.seller_id===user.id?`<button class="secondary" onclick="editMyVideoPost('${p.id}')">✏️ Edit</button><button class="secondary" onclick="removeProductFromPublic('${p.id}')">🙈 Unpublish</button><button class="danger" onclick="deleteMyProduct('${p.id}')">🗑️ Delete</button>`:""}</div></div></article>`;
  }));
  box.innerHTML=cards.join("");
 }
 const videoViewRecorded = new Set();
+async function editMyVideoPost(id){
+ if(!user)return;const {data:p,error:loadError}=await supabaseClient.from("products").select("id,name,description,seller_id,category").eq("id",id).eq("seller_id",user.id).maybeSingle();if(loadError||!p||p.category!=="Video"){alert("Ntibishobotse kubona video yawe cyangwa nta burenganzira bwo kuyihindura.");return}
+ const name=prompt("Andika umutwe mushya wa video:",p.name||"");if(name===null)return;if(!name.trim()){alert("Umutwe wa video ntushobora kuba ubusa.");return}
+ const description=prompt("Andika ibisobanuro bishya:",p.description||"");if(description===null)return;
+ const {error}=await supabaseClient.from("products").update({name:name.trim(),description:description.trim()}).eq("id",id).eq("seller_id",user.id);
+ if(error){alert("Ntibyashobotse guhindura video: "+error.message);return}await loadProducts();renderProducts();await loadFreeVideoPosts();await loadMyPosts();
+}
+async function publishMyVideoPost(id){if(!user)return;const {error}=await supabaseClient.from("products").update({status:"active"}).eq("id",id).eq("seller_id",user.id).eq("category","Video");if(error){alert("Ntibyashobotse kongera gushyira video public: "+error.message);return}await loadProducts();await loadFreeVideoPosts();await loadMyPosts()}
+async function loadProfileFollowers(){
+ const box=$("profileFollowerList");if(!box||!user)return;box.innerHTML="⏳ Turimo gushaka abagukurikira...";
+ const {data,error}=await supabaseClient.from("user_follows").select("follower_id").eq("followed_id",user.id).limit(100);
+ if(error){box.innerHTML=`<p class="muted">Abagukurikira ntibabonetse. Reba user_follows RLS: ${escapeHTML(error.message)}</p>`;return}
+ if(!data?.length){box.innerHTML="Nta muntu uragukurikira.";return}
+ const ids=[...new Set(data.map(x=>x.follower_id).filter(Boolean))];const profiles=await supabaseClient.from("profiles").select("id,name,avatar_url,city").in("id",ids);const map=new Map((profiles.data||[]).map(x=>[x.id,x]));
+ box.innerHTML=data.map(f=>{const p=map.get(f.follower_id)||{};return `<div class="actionRow" style="justify-content:space-between;border-bottom:1px solid #edf0f5;padding:8px 0"><span class="notranslate" translate="no">${escapeHTML(p.name||"Trcose user")}</span><button class="secondary" onclick="messageSeller('${String(f.follower_id).replace(/'/g,"\\'")}')">💬 Message</button></div>`}).join("");
+}
+async function loadMyPosts(){
+ const box=$("profileMyPosts");if(!box||!user)return;box.innerHTML="⏳ Turimo gushaka posts zawe...";
+ const {data,error}=await supabaseClient.from("products").select("id,name,description,category,status,image_url,thumbnail_url,created_at").eq("seller_id",user.id).order("created_at",{ascending:false}).limit(100);
+ if(error){box.innerHTML=`<p class="muted">Posts ntizabonetse: ${escapeHTML(error.message)}</p>`;return}
+ if(!data?.length){box.innerHTML="Nta posts ufite.";return}
+ box.innerHTML=data.map(p=>`<div class="card" style="padding:12px;margin:8px 0"><b class="notranslate" translate="no">${escapeHTML(p.name||"Post")}</b><p class="muted">${escapeHTML(p.category||"Post")} · ${escapeHTML(p.status||"unknown")}</p><p>${escapeHTML(p.description||"")}</p><div class="actionRow">${p.category==="Video"?`<button class="secondary" onclick="editMyVideoPost('${p.id}')">✏️ Edit</button>${p.status==="active"?`<button class="secondary" onclick="removeProductFromPublic('${p.id}')">🙈 Unpublish</button>`:`<button class="successBtn" onclick="publishMyVideoPost('${p.id}')">🌐 Publish</button>`}`:`<button class="secondary" onclick="openProduct('${p.id}')">👀 View</button>`}<button class="danger" onclick="deleteMyProduct('${p.id}')">🗑️ Delete</button></div></div>`).join("");
+}
 async function recordVideoPostView(productId){
  if(videoViewRecorded.has(productId))return;videoViewRecorded.add(productId);
  try{await supabaseClient.from("product_events").insert({product_id:productId,event_type:"view",user_id:user?.id||null});}catch(e){}
@@ -1048,6 +1141,43 @@ function openWalletWithdraw(){if(!user){openAuth();return}showPage("referral");$
 function startVisaGateway(){if(!user){openAuth();return}$("paymentMessage").innerHTML='<span class="notice">Visa Card: gateway ntirashyirwamo. Huza payment provider na Supabase Edge Function; ntukandike card number cyangwa CVV muri website.</span>'}
 function startBinanceGateway(){if(!user){openAuth();return}$("paymentMessage").innerHTML='<span class="notice">Binance Pay: iyi ni placeholder. Payment nyayo isaba Binance Pay merchant account, server-side order creation na webhook verification. Ntukohereze amafaranga kuri address itagenzuwe.</span>'}
 
+async function loadAdminUsers(){
+ if(!await isTrcoseAdmin())return;const box=$("adminUsersList");if(!box)return;box.innerHTML="⏳ Loading users...";
+ const [users,productsResult,events,jobs]=await Promise.all([
+  supabaseClient.from("profiles").select("id,name,email,role,city,phone").order("name",{ascending:true}).limit(500),
+  supabaseClient.from("products").select("id",{count:"exact",head:true}),
+  supabaseClient.from("product_events").select("id",{count:"exact",head:true}).gte("created_at",new Date(Date.now()-24*60*60*1000).toISOString()),
+  supabaseClient.from("jobs").select("id",{count:"exact",head:true})
+ ]);
+ if($("adminUsersCount"))$("adminUsersCount").textContent=users.error?"—":String(users.data?.length||0);
+ if($("adminProductsCount"))$("adminProductsCount").textContent=productsResult.error?"—":String(productsResult.count||0);
+ if($("adminRecentEvents"))$("adminRecentEvents").textContent=events.error?"—":String(events.count||0);
+ if($("adminJobsCount"))$("adminJobsCount").textContent=jobs.error?"—":String(jobs.count||0);
+ if(users.error){box.innerHTML=`<p class="error">Ntibishobotse kubona users. Reba profiles RLS/admin read policy: ${escapeHTML(users.error.message)}</p>`;return}
+ box.innerHTML=(users.data||[]).map(u=>`<div class="card" style="padding:12px;margin:8px 0"><b class="notranslate" translate="no">${escapeHTML(u.name||"Trcose user")}</b><p>${escapeHTML(u.email||"")} · ${escapeHTML(u.role||"customer")} · ${escapeHTML(u.city||"")}</p><div class="actionRow"><button class="secondary" onclick="messageSeller('${String(u.id).replace(/'/g,"\\'")}')">💬 Direct message</button></div></div>`).join("")||"Nta users babonetse.";
+}
+async function adminSetContentStatus(table,id,status){if(!await isTrcoseAdmin())return;let query;if(table==="jobs"){query=supabaseClient.from("jobs").update({is_public:status==="active"}).eq("id",id)}else{query=supabaseClient.from(table).update({status}).eq("id",id)}const {error}=await query;if(error){alert("Supabase yanze guhindura status/public. Reba admin RLS policy: "+error.message);return}await loadAdminContent()}
+async function adminDeleteContent(table,id){if(!await isTrcoseAdmin()||!confirm("Uremeza gusiba iyi post/akazi burundu? Ibi ntibishobora gusubizwa."))return;const {error}=await supabaseClient.from(table).delete().eq("id",id);if(error){alert("Supabase yanze gusiba. Reba admin RLS policy: "+error.message);return}await loadAdminContent();if(table==="products"){await loadProducts();renderProducts();await loadFreeVideoPosts()}}
+async function loadAdminContent(){
+ if(!await isTrcoseAdmin())return;const box=$("adminContentList");if(!box)return;box.innerHTML="⏳ Loading posts and jobs...";
+ const [pr,jr]=await Promise.all([
+  supabaseClient.from("products").select("id,name,category,status,seller_id,created_at").order("created_at",{ascending:false}).limit(100),
+  supabaseClient.from("jobs").select("id,title,company,status,is_public,user_id,owner_id,created_at").order("created_at",{ascending:false}).limit(100)
+ ]);
+ let html="<h4>Posts / Products / Videos</h4>";
+ if(pr.error)html+=`<p class="error">Products: ${escapeHTML(pr.error.message)}</p>`;else html+=(pr.data||[]).map(x=>`<div class="card" style="padding:12px;margin:8px 0"><b class="notranslate" translate="no">${escapeHTML(x.name||"Post")}</b><p>${escapeHTML(x.category||"")} · ${escapeHTML(x.status||"")}</p><div class="actionRow"><button class="secondary" onclick="adminSetContentStatus('products','${x.id}','${x.status==='active'?'hidden':'active'}')">${x.status==='active'?'🙈 Unpublish':'🌐 Publish'}</button><button class="danger" onclick="adminDeleteContent('products','${x.id}')">🗑️ Delete</button></div></div>`).join("")||"<p>Nta posts.</p>";
+ html+="<h4>Jobs</h4>";
+ if(jr.error)html+=`<p class="error">Jobs: ${escapeHTML(jr.error.message)}</p>`;else html+=(jr.data||[]).map(x=>`<div class="card" style="padding:12px;margin:8px 0"><b>${escapeHTML(x.title||"Job")}</b><p>${escapeHTML(x.company||"")} · ${escapeHTML(x.status||"")} · public: ${escapeHTML(String(x.is_public??"—"))}</p><div class="actionRow"><button class="secondary" onclick="adminSetContentStatus('jobs','${x.id}','${x.is_public?'hidden':'active'}')">${x.is_public?'🙈 Unpublish':'🌐 Publish'}</button><button class="danger" onclick="adminDeleteContent('jobs','${x.id}')">🗑️ Delete job</button></div></div>`).join("")||"<p>Nta kazi.</p>";
+ box.innerHTML=html;
+}
+async function loadAdminComments(){
+ if(!await isTrcoseAdmin())return;const box=$("adminCommentsList");if(!box)return;box.innerHTML="⏳ Loading comments...";
+ const {data,error}=await supabaseClient.from("product_comments").select("id,product_id,user_id,body,created_at").order("created_at",{ascending:false}).limit(100);
+ if(error){box.innerHTML=`<p class="error">Comments ntizabonetse: ${escapeHTML(error.message)}. Reba admin RLS policy.</p>`;return}
+ if(!data?.length){box.innerHTML="Nta comments.";return}
+ box.innerHTML=data.map(c=>`<div class="card" style="padding:10px;margin:8px 0"><p>${escapeHTML(c.body||"")}</p><p class="muted">Product: ${escapeHTML(c.product_id||"")} · User: ${escapeHTML(c.user_id||"")}</p><button class="danger" onclick="adminDeleteComment('${c.id}')">🗑️ Delete comment</button></div>`).join("");
+}
+async function adminDeleteComment(id){if(!await isTrcoseAdmin()||!confirm("Urashaka gusiba iyi comment?"))return;const {error}=await supabaseClient.from("product_comments").delete().eq("id",id);if(error){alert("Comment ntiyasibwe. Reba admin RLS policy: "+error.message);return}await loadAdminComments()}
 async function showAdminDashboard(){if(!await isTrcoseAdmin()){alert("Nturi Admin wa Trcose.");return}showPage("admin");await loadAdminPayments()}
 
     function showAdminTab(t){
@@ -1059,12 +1189,16 @@ async function showAdminDashboard(){if(!await isTrcoseAdmin()){alert("Nturi Admi
   $("adminExamSection").classList.toggle("hidden", t !== "exams" && t !== "examManager");
   $("adminRevenueSection").classList.toggle("hidden", t !== "revenue");
   $("adminManagerSection").classList.toggle("hidden", t !== "managers");
+  $("adminUsersSection")?.classList.toggle("hidden",t!=="users");
+  $("adminContentSection")?.classList.toggle("hidden",t!=="content");
   $("adminExamManagerSection").classList.toggle("hidden", t !== "examManager");
   if(t === "applications") loadAdminJobApplications();
   if(t === "withdrawals") loadAdminWithdrawals();
   if(t === "exams") loadAdminExams();
   if(t === "revenue") loadAdminRevenue();
   if(t === "managers") loadAdminManagerRequests();
+  if(t === "users") loadAdminUsers();
+  if(t === "content") {loadAdminContent();loadAdminComments()}
   if(t === "examManager") {
     resetAdminExamBuilder();
     loadAdminExamManager();
@@ -1151,7 +1285,7 @@ const TRCOSE_UI_TRANSLATIONS={
  ar:{site_brand:"Trcose 🛍️",my_profile:"ملفي الشخصي",full_name:"الاسم الكامل",auth_title:"🔐 تسجيل الدخول إلى Trcose",google_continue:"المتابعة باستخدام Google",or_email:"أو استخدم البريد الإلكتروني",email_placeholder:"البريد الإلكتروني",password_placeholder:"كلمة المرور",login:"تسجيل الدخول",signup:"إنشاء حساب",close:"إغلاق",market_word:"السوق",forgot_password:"هل نسيت كلمة المرور؟",reset_password_title:"🔐 إعادة تعيين كلمة المرور",reset_password_help:"أدخل كلمة مرور جديدة وأكدها.",new_password_placeholder:"كلمة مرور جديدة (6 أحرف على الأقل)",confirm_password_placeholder:"تأكيد كلمة المرور الجديدة",save_new_password:"حفظ كلمة المرور الجديدة",reset_email_required:"أدخل بريدك الإلكتروني أولاً.",reset_email_sent:"تحقق من بريدك الإلكتروني للحصول على رابط إعادة التعيين.",password_mismatch:"يجب أن تتكون كلمة المرور من 6 أحرف على الأقل وأن تتطابق.",password_updated:"تم تحديث كلمة المرور. يمكنك متابعة استخدام Trcose Market.",password_update_error:"تعذر تحديث كلمة المرور: "}
 };
 function t(key){ return TRCOSE_UI_TRANSLATIONS[zunivoLanguage]?.[key] || TRCOSE_JOB_TRANSLATIONS[zunivoLanguage]?.[key] || ZUNIVO_TRANSLATIONS[zunivoLanguage]?.[key] || ZUNIVO_TRANSLATIONS.en?.[key] || key; }
-function applyTrcoseLanguage(lang){ if(!ZUNIVO_LANGUAGES[lang]) lang="en"; zunivoLanguage=lang; localStorage.setItem("trcose_language",lang); localStorage.setItem("zunivo_language",lang); const html=document.getElementById("zunivoHtml")||document.documentElement; html.lang=lang; const titleText=TRCOSE_UI_TRANSLATIONS[lang]?.site_brand||"Trcose 🛍️"; document.title=titleText||"Trcose Market"; html.dir=lang==="ar"?"rtl":"ltr"; document.documentElement.style.direction=lang==="ar"?"rtl":"ltr"; document.querySelectorAll("[data-i18n]").forEach(el=>{ const key=el.getAttribute("data-i18n"); const value=t(key); if(value && el.children.length===0) el.textContent=value; }); document.querySelectorAll("[data-i18n-placeholder]").forEach(el=>{el.placeholder=t(el.getAttribute("data-i18n-placeholder"));}); const selector=document.getElementById("languageSelect"); if(selector)selector.value=lang; }
+function applyTrcoseLanguage(lang){ if(!ZUNIVO_LANGUAGES[lang]) lang="en"; document.querySelectorAll(".logo,#profileName,.notranslate,[translate=\"no\"]").forEach(el=>{el.classList.add("notranslate");el.setAttribute("translate","no")}); zunivoLanguage=lang; localStorage.setItem("trcose_language",lang); localStorage.setItem("zunivo_language",lang); const html=document.getElementById("zunivoHtml")||document.documentElement; html.lang=lang; document.title="Trcose Market"; html.dir=lang==="ar"?"rtl":"ltr"; document.documentElement.style.direction=lang==="ar"?"rtl":"ltr"; document.querySelectorAll(".notranslate,[translate=\"no\"]").forEach(el=>{el.classList.add("notranslate");el.setAttribute("translate","no")}); document.querySelectorAll("[data-i18n]").forEach(el=>{ const key=el.getAttribute("data-i18n"); const value=t(key); if(value && el.children.length===0) el.textContent=value; }); document.querySelectorAll("[data-i18n-placeholder]").forEach(el=>{el.placeholder=t(el.getAttribute("data-i18n-placeholder"));}); const selector=document.getElementById("languageSelect"); if(selector)selector.value=lang; }
 function changeLanguage(lang){ applyTrcoseLanguage(lang); }
 document.addEventListener("DOMContentLoaded",()=>applyTrcoseLanguage(zunivoLanguage));
     let adminExamQuestions=[]; let editingExamId=null; let examTimer=null; let activeExam=null; function addAdminExamQuestion(data=null){ const id="q_"+Date.now()+"_"+Math.random().toString(36).slice(2,7); adminExamQuestions.push({ localId:id, id:data?.id||null, question:data?.question||"", option_a:data?.option_a||"", option_b:data?.option_b||"", option_c:data?.option_c||"", option_d:data?.option_d||"", correct_answer:data?.correct_answer||"a" }); renderAdminExamQuestions(); } function renderAdminExamQuestions(){ const box=$("adminExamQuestions"); if(!adminExamQuestions.length){ box.innerHTML= '<div class="notice">Nta question urashyiramo. Kanda "Ongeramo Question".</div>'; return; } box.innerHTML=adminExamQuestions.map((q,i)=>` <div class="examBuilderQuestion"> <h4> Question ${i+1} </h4> <textarea placeholder="${escapeHTML(t("question"))}" oninput="updateAdminExamQuestion('${q.localId}','question',this.value)" >${escapeHTML(q.question)}</textarea> <div class="examOptionGrid"> <input placeholder="${escapeHTML(t("option_a"))}" value="${escapeHTML(q.option_a)}" oninput="updateAdminExamQuestion('${q.localId}','option_a',this.value)" > <input placeholder="${escapeHTML(t("option_b"))}" value="${escapeHTML(q.option_b)}" oninput="updateAdminExamQuestion('${q.localId}','option_b',this.value)" > <input placeholder="${escapeHTML(t("option_c"))}" value="${escapeHTML(q.option_c)}" oninput="updateAdminExamQuestion('${q.localId}','option_c',this.value)" > <input placeholder="${escapeHTML(t("option_d"))}" value="${escapeHTML(q.option_d)}" oninput="updateAdminExamQuestion('${q.localId}','option_d',this.value)" > </div> <div style="margin-top:10px"> <b>${escapeHTML(t("correct_answer"))}</b> <div class="examOptionGrid"> ${["a","b","c","d"].map(x=>` <label class="examOption"> <input type="radio" name="correct_${q.localId}" ${q.correct_answer===x?"checked":""} onchange="updateAdminExamQuestion('${q.localId}','correct_answer','${x}')" > ${x.toUpperCase()} </label> `).join("")} </div> </div> <div class="examAdminActions"> <button class="danger" onclick="removeAdminExamQuestion('${q.localId}')"> 🗑️ Remove </button> </div> </div> `).join(""); } function updateAdminExamQuestion(localId,key,value){ const q=adminExamQuestions.find(x=>x.localId===localId); if(q) q[key]=value; } function removeAdminExamQuestion(localId){ adminExamQuestions= adminExamQuestions.filter(x=>x.localId!==localId); renderAdminExamQuestions(); } function resetAdminExamBuilder(){ editingExamId=null; adminExamQuestions=[]; $("adminExamTitle").value=""; $("adminExamDescription").value=""; $("adminExamDuration").value=30; $("adminExamPassing").value=50; renderAdminExamQuestions(); } async function saveAdminExam(status){ if(!await isTrcoseAdmin()){ alert("Nturi Admin."); return; } const title=$("adminExamTitle").value.trim(); const description=$("adminExamDescription").value.trim(); const duration=Number($("adminExamDuration").value||30); const passing=Number($("adminExamPassing").value||50); if(!title){ $("adminExamManagerMessage").textContent= "Andika exam title."; return; } if(!adminExamQuestions.length){ $("adminExamManagerMessage").textContent= "Banza wongeremo questions."; return; } for(const q of adminExamQuestions){ if( !q.question.trim() || !q.option_a.trim() || !q.option_b.trim() || !q.option_c.trim() || !q.option_d.trim() ){ $("adminExamManagerMessage").textContent= "Buri question igomba kugira question na options A-D."; return; } } $("adminExamManagerMessage").textContent="⏳ Saving..."; let examId=editingExamId; if(examId){ const {error}=await supabaseClient .from("exams") .update({ title, description, duration_minutes:duration, passing_score:passing, status }) .eq("id",examId); if(error){ $("adminExamManagerMessage").textContent=error.message; return; } await supabaseClient .from("exam_questions") .delete() .eq("exam_id",examId); }else{ const {data,error}=await supabaseClient .from("exams") .insert({ title, description, duration_minutes:duration, passing_score:passing, status, created_by:user.id }) .select() .single(); if(error){ $("adminExamManagerMessage").textContent=error.message; return; } examId=data.id; } const rows=adminExamQuestions.map((q,index)=>({ exam_id:examId, question_order:index+1, question:q.question.trim(), option_a:q.option_a.trim(), option_b:q.option_b.trim(), option_c:q.option_c.trim(), option_d:q.option_d.trim(), correct_answer:q.correct_answer })); const {error:qError}=await supabaseClient .from("exam_questions") .insert(rows); if(qError){ $("adminExamManagerMessage").textContent=qError.message; return; } $("adminExamManagerMessage").innerHTML= status==="published" ? `<span class="success">${escapeHTML(t("exam_published_success"))}</span>` : `<span class="success">${escapeHTML(t("exam_saved"))}</span>`; resetAdminExamBuilder(); await loadAdminExamManager(); } async function loadAdminExamManager(){ if(!await isTrcoseAdmin())return; const box=$("adminExamManagerList"); box.innerHTML="⏳ Loading..."; const {data,error}=await supabaseClient .from("exams") .select("*") .order("created_at",{ascending:false}); if(error){ box.innerHTML= `<div class="error">${escapeHTML(error.message)}</div>`; return; } if(!data?.length){ box.innerHTML= `<p class="muted">${escapeHTML(t("no_exams"))}</p>`; return; } box.innerHTML=data.map(e=>` <div class="card" style="padding:14px;margin-bottom:10px"> <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"> <h3 style="margin:0"> ${escapeHTML(e.title)} </h3> <span class="status ${ e.status==="published" ?"examPublished" :"examDraft" }"> ${escapeHTML(e.status||"draft")} </span> </div> <p class="muted"> ${escapeHTML(e.description||"")} </p> <p> ⏱️ 
