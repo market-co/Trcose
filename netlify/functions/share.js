@@ -8,143 +8,40 @@ exports.handler = async function (event) {
   const anonKey = process.env.SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !anonKey || !id) {
-    return {
-      statusCode: 400,
-      body: "Missing configuration or ID."
-    };
+    return { statusCode: 400, body: "Missing configuration or ID." };
   }
 
   if (!/^[0-9a-f-]{36}$/i.test(id)) {
-    return {
-      statusCode: 400,
-      body: "Invalid item ID."
-    };
+    return { statusCode: 400, body: "Invalid item ID." };
   }
 
-  const esc = value =>
-    String(value || "").replace(/[&<>"']/g, c => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
-    })[c]);
+  const esc = value => String(value || "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[c]);
 
-  function validImage(value) {
-    if (typeof value !== "string" || !value.trim()) {
-      return "";
+  async function readTable(table, fields) {
+    const url = new URL(`/rest/v1/${table}`, supabaseUrl);
+    url.searchParams.set("select", fields);
+    url.searchParams.set("id", `eq.${id}`);
+    url.searchParams.set("limit", "1");
+
+    const response = await fetch(url, {
+      headers: {
+        apikey: anonKey,
+        Authorization: `Bearer ${anonKey}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Database read failed: ${table}`);
     }
 
-    const raw = value.trim();
-
-    try {
-      let url;
-
-      if (/^https?:\/\//i.test(raw)) {
-        url = new URL(raw);
-      } else if (raw.startsWith("/storage/v1/object/public/")) {
-        url = new URL(raw, supabaseUrl);
-      } else {
-        // Support paths that include a known public bucket.
-        const path = raw.replace(/^\/+/, "");
-        const buckets = [
-          "product-images/",
-          "product-media/",
-          "product-videos/",
-          "profile-pictures/",
-          "public-posts/"
-        ];
-
-        if (buckets.some(bucket => path.startsWith(bucket))) {
-          url = new URL(
-            "/storage/v1/object/public/" + path,
-            supabaseUrl
-          );
-        } else {
-          return "";
-        }
-      }
-
-      if (!["https:", "http:"].includes(url.protocol)) {
-        return "";
-      }
-
-      if (/\.(mp4|mov|webm|m3u8|avi|mkv)(?:$|[?#])/i.test(url.href)) {
-        return "";
-      }
-
-      return url.href;
-    } catch {
-      return "";
-    }
-  }
-
-  async function readTable(table, fieldSets) {
-    let lastError = "";
-
-    for (const fields of fieldSets) {
-      const url = new URL(`/rest/v1/${table}`, supabaseUrl);
-      url.searchParams.set("select", fields);
-      url.searchParams.set("id", `eq.${id}`);
-      url.searchParams.set("limit", "1");
-
-      const response = await fetch(url, {
-        headers: {
-          apikey: anonKey,
-          Authorization: `Bearer ${anonKey}`
-        }
-      });
-
-      if (!response.ok) {
-        lastError = await response.text();
-        console.error(
-          `Supabase read failed: ${table}; fields=${fields}; status=${response.status}; details=${lastError}`
-        );
-        continue;
-      }
-
-      const rows = await response.json();
-      return rows[0] || null;
-    }
-
-    throw new Error(
-      `Could not read ${table}. Last database error: ${lastError}`
-    );
-  }
-
-  async function readProductMedia() {
-    try {
-      const url = new URL("/rest/v1/product_media", supabaseUrl);
-      url.searchParams.set("select", "file_url");
-      url.searchParams.set("product_id", `eq.${id}`);
-      url.searchParams.set("is_public", "eq.true");
-      url.searchParams.set("limit", "10");
-
-      const response = await fetch(url, {
-        headers: {
-          apikey: anonKey,
-          Authorization: `Bearer ${anonKey}`
-        }
-      });
-
-      if (!response.ok) {
-        console.error(
-          "Product media lookup failed:",
-          response.status,
-          await response.text()
-        );
-        return "";
-      }
-
-      const rows = await response.json();
-
-      return (rows || [])
-        .map(row => validImage(row.file_url))
-        .find(Boolean) || "";
-    } catch (error) {
-      console.error("Product media lookup error:", error);
-      return "";
-    }
+    const rows = await response.json();
+    return rows[0] || null;
   }
 
   try {
@@ -152,121 +49,124 @@ exports.handler = async function (event) {
     let image = "";
 
     if (type === "job") {
-      item = await readTable("jobs", [
-        "id,title,company,description,image_url,thumbnail_url,media_url,video_url,is_public",
-        "id,title,company,description,image,thumbnail_url,media_url,video_url,is_public",
-        "id,title,company,description,image,video,file_url,is_public",
-        "id,title,company,description,media_url,is_public"
-      ]);
+      item = await readTable(
+        "jobs",
+        "id,title,company,description,requirements,image_url,media_url,video_url,is_public"
+      );
 
       if (!item || item.is_public !== true) {
-        return {
-          statusCode: 404,
-          headers: {
-            "Cache-Control": "no-store"
-          },
-          body: "Public job not found."
-        };
+        return { statusCode: 404, body: "Public job not found." };
       }
 
-      image =
-        validImage(item.thumbnail_url) ||
-        validImage(item.image_url) ||
-        validImage(item.image) ||
-        validImage(item.media_url) ||
-        validImage(item.file_url) ||
-        validImage(item.video_url) ||
-        "";
-
+      image = item.image_url || item.media_url || "";
     } else {
-      item = await readTable("products", [
-        "id,name,title,description,image_url,image_urls,thumbnail_url,media_url,is_public",
-        "id,name,title,description,image_url,thumbnail_url,media_url,is_public",
-        "id,name,title,description,image,thumbnail_url,media_url,is_public",
-        "id,name,title,description,image,is_public"
-      ]);
+      item = await readTable(
+        "products",
+        "id,name,title,description,image_url,image_urls,thumbnail_url,media_url,is_public"
+      );
 
       if (!item || item.is_public === false) {
-        return {
-          statusCode: 404,
-          headers: {
-            "Cache-Control": "no-store"
-          },
-          body: "Public product not found."
-        };
+        return { statusCode: 404, body: "Public product not found." };
       }
 
-      const imageList = Array.isArray(item.image_urls)
-        ? item.image_urls
-        : [];
-
       image =
-        validImage(item.thumbnail_url) ||
-        validImage(item.image_url) ||
-        validImage(item.image) ||
-        validImage(item.media_url) ||
-        imageList.map(validImage).find(Boolean) ||
+        item.thumbnail_url ||
+        item.image_url ||
+        (Array.isArray(item.image_urls) ? item.image_urls[0] : "") ||
+        item.media_url ||
         "";
 
-      // Preserve the existing product-media fallback.
       if (!image) {
-        image = await readProductMedia();
+        const url = new URL("/rest/v1/product_media", supabaseUrl);
+        url.searchParams.set("select", "file_url");
+        url.searchParams.set("product_id", `eq.${id}`);
+        url.searchParams.set("is_public", "eq.true");
+        url.searchParams.set("limit", "1");
+
+        const response = await fetch(url, {
+          headers: {
+            apikey: anonKey,
+            Authorization: `Bearer ${anonKey}`
+          }
+        });
+
+        if (response.ok) {
+          const media = await response.json();
+          image = media[0]?.file_url || "";
+        }
       }
     }
 
     const title = type === "job"
-      ? item.title || "Job kuri Trcose Market"
-      : item.name || item.title || "Product kuri Trcose Market";
+      ? item.title || "Akazi kuri Trcose Market"
+      : item.name || item.title || "Igicuruzwa kuri Trcose Market";
 
-    const description = item.description ||
-      "Reba amakuru arambuye kuri Trcose Market.";
+    const description = String(
+      item.description ||
+      item.requirements ||
+      "Reba amakuru arambuye kuri Trcose Market."
+    ).replace(/\s+/g, " ").trim();
 
     const destination = type === "job"
-      ? new URL(
-          `job.html?job=${encodeURIComponent(id)}`,
-          "https://market-co.github.io/Trcose/"
-        )
-      : new URL(
-          `index.html#?product=${encodeURIComponent(id)}`,
-          "https://market-co.github.io/Trcose/"
-        );
+      ? `https://market-co.github.io/Trcose/job.html?job=${encodeURIComponent(id)}`
+      : `https://market-co.github.io/Trcose/index.html#?product=${encodeURIComponent(id)}`;
 
-    const shareUrl = new URL(
-      event.rawUrl || destination.href
-    ).href;
+    const shareUrl =
+      `https://trcose.netlify.app/.netlify/functions/share?type=${type}&id=${encodeURIComponent(id)}`;
 
+    const safeImage =
+      typeof image === "string" && /^https:\/\//i.test(image.trim())
+        ? image.trim()
+        : "";
+
+    const userAgent = event.headers?.["user-agent"] ||
+      event.headers?.["User-Agent"] || "";
+
+    const isPreviewBot =
+      /whatsapp|facebookexternalhit|facebot|twitterbot|telegrambot|linkedinbot|slackbot|discordbot|skypeuripreview|pinterest|googlebot|bingbot/i
+        .test(userAgent);
+
+    // Abantu basanzwe bahita bajya ku rupapuro nyarwo.
+    if (!isPreviewBot) {
+      return {
+        statusCode: 302,
+        headers: {
+          Location: destination,
+          "Cache-Control": "no-store"
+        },
+        body: ""
+      };
+    }
+
+    // Ama-bot abona amakuru ya Open Graph kugira ngo yerekane preview.
     const html = `<!doctype html>
 <html lang="rw">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)} | Trcose Market</title>
-<meta name="description" content="${esc(description)}">
-
+<meta name="description" content="${esc(description.slice(0, 300))}">
 <meta property="og:site_name" content="Trcose Market">
 <meta property="og:type" content="website">
 <meta property="og:title" content="${esc(title)}">
-<meta property="og:description" content="${esc(description)}">
+<meta property="og:description" content="${esc(description.slice(0, 300))}">
 <meta property="og:url" content="${esc(shareUrl)}">
-<meta property="og:locale" content="rw_RW">
-${image ? `
-<meta property="og:image" content="${esc(image)}">
-<meta property="og:image:secure_url" content="${esc(image)}">
-<meta property="og:image:type" content="image/jpeg">
-<meta name="twitter:image" content="${esc(image)}">
+${safeImage ? `
+<meta property="og:image" content="${esc(safeImage)}">
+<meta property="og:image:secure_url" content="${esc(safeImage)}">
+<meta property="og:image:alt" content="${esc(title)}">
+<meta name="twitter:image" content="${esc(safeImage)}">
 ` : ""}
-<meta name="twitter:card" content="${image ? "summary_large_image" : "summary"}">
+<meta name="twitter:card" content="${safeImage ? "summary_large_image" : "summary"}">
 <meta name="twitter:title" content="${esc(title)}">
-<meta name="twitter:description" content="${esc(description)}">
-
-<meta http-equiv="refresh" content="1;url=${esc(destination.href)}">
+<meta name="twitter:description" content="${esc(description.slice(0, 300))}">
+<meta http-equiv="refresh" content="0;url=${esc(destination)}">
 </head>
 <body>
-<p>Urimo gufungura
-<a href="${esc(destination.href)}">Trcose Market</a>...</p>
-<script>
-location.replace(${JSON.stringify(destination.href)});
-</script>
+<h1>${esc(title)}</h1>
+<p>${esc(description)}</p>
+${safeImage ? `<img src="${esc(safeImage)}" alt="${esc(title)}" style="max-width:100%;height:auto">` : ""}
+<p><a href="${esc(destination)}">Fungura kuri Trcose Market</a></p>
 </body>
 </html>`;
 
@@ -278,15 +178,13 @@ location.replace(${JSON.stringify(destination.href)});
       },
       body: html
     };
-
   } catch (error) {
     console.error("Share function error:", error);
 
     return {
       statusCode: 500,
       headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "no-store"
+        "Content-Type": "text/plain; charset=utf-8"
       },
       body: "Ntibyashobotse kubona amakuru. Reba Netlify logs na Supabase permissions."
     };
