@@ -69,73 +69,54 @@ exports.handler = async function (event) {
     let item;
     let image = "";
 
-    if (type === "job") {
-      item = await readTable(
-        "jobs",
-        "id,title,company,description,image_url,thumbnail_url,media_url,video_url,is_public"
-      );
+    
+if (type === "job") {
+  item = await readTable(
+    "jobs",
+    "id,title,company,description,image_url,thumbnail_url,media_url,video_url,is_public"
+  );
 
-      if (!item || item.is_public !== true) {
-        return {
-          statusCode: 404,
-          body: "Public job not found."
-        };
+  if (!item || item.is_public !== true) {
+    return {
+      statusCode: 404,
+      body: "Public job not found."
+    };
+  }
+
+  // Try each possible job image field.
+  image =
+    validImage(item.thumbnail_url) ||
+    validImage(item.image_url) ||
+    validImage(item.media_url) ||
+    "";
+
+  // If the job image is stored in a related media record,
+  // try the existing public product_media table as a fallback.
+  if (!image) {
+    const mediaUrl = new URL(
+      "/rest/v1/product_media",
+      supabaseUrl
+    );
+    mediaUrl.searchParams.set("select", "file_url");
+    mediaUrl.searchParams.set("product_id", `eq.${id}`);
+    mediaUrl.searchParams.set("is_public", "eq.true");
+    mediaUrl.searchParams.set("limit", "10");
+
+    const response = await fetch(mediaUrl, {
+      headers: {
+        apikey: anonKey,
+        Authorization: `Bearer ${anonKey}`
       }
+    });
 
-      // Dubai Hotel: media_url may contain the actual job image
-      // even when image_url is empty.
-      image =
-        validImage(item.media_url) ||
-        validImage(item.image_url) ||
-        validImage(item.thumbnail_url) ||
-        validImage(item.video_url) ||
-        "";
-    } else {
-      item = await readTable(
-        "products",
-        "id,name,title,description,image_url,image_urls,thumbnail_url,media_url,is_public"
-      );
-
-      if (!item || item.is_public === false) {
-        return {
-          statusCode: 404,
-          body: "Public product not found."
-        };
-      }
-
-      const imageList = Array.isArray(item.image_urls)
-        ? item.image_urls
-        : [];
-
-      image =
-        validImage(item.image_url) ||
-        validImage(item.thumbnail_url) ||
-        validImage(item.media_url) ||
-        imageList.map(validImage).find(Boolean) ||
-        "";
-
-      // Try product_media only when the product has no usable image.
-      if (!image) {
-        const url = new URL("/rest/v1/product_media", supabaseUrl);
-        url.searchParams.set("select", "file_url");
-        url.searchParams.set("product_id", `eq.${id}`);
-        url.searchParams.set("is_public", "eq.true");
-        url.searchParams.set("limit", "10");
-
-        const response = await fetch(url, {
-          headers: {
-            apikey: anonKey,
-            Authorization: `Bearer ${anonKey}`
-          }
-        });
-
-        if (response.ok) {
-          const media = await response.json();
-          image = (media || [])
-            .map(row => validImage(row.file_url))
-            .find(Boolean) || "";
-        }
-      }
+    if (response.ok) {
+      const media = await response.json();
+      image = (media || [])
+        .map(row => validImage(row.file_url))
+        .find(Boolean) || "";
+    }
+  }
+} else {
     }
 
     const title = type === "job"
