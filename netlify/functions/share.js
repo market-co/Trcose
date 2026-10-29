@@ -8,115 +8,210 @@ exports.handler = async function (event) {
   const anonKey = process.env.SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !anonKey || !id) {
-    return { statusCode: 400, body: "Missing configuration or ID." };
+    return {
+      statusCode: 400,
+      body: "Missing configuration or ID."
+    };
   }
 
   if (!/^[0-9a-f-]{36}$/i.test(id)) {
-    return { statusCode: 400, body: "Invalid item ID." };
+    return {
+      statusCode: 400,
+      body: "Invalid item ID."
+    };
   }
 
-  const esc = value => String(value || "").replace(/[&<>"']/g, c => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[c]);
+  const esc = value =>
+    String(value || "").replace(/[&<>"']/g, c => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[c]);
 
   function validImage(value) {
-    if (typeof value !== "string" || !value.trim()) return "";
+    if (typeof value !== "string" || !value.trim()) {
+      return "";
+    }
+
+    const raw = value.trim();
+
     try {
-      const url = new URL(value.trim());
-      if (url.protocol !== "https:" && url.protocol !== "http:") {
+      let url;
+
+      if (/^https?:\/\//i.test(raw)) {
+        url = new URL(raw);
+      } else if (raw.startsWith("/storage/v1/object/public/")) {
+        url = new URL(raw, supabaseUrl);
+      } else {
+        // Support paths that include a known public bucket.
+        const path = raw.replace(/^\/+/, "");
+        const buckets = [
+          "product-images/",
+          "product-media/",
+          "product-videos/",
+          "profile-pictures/",
+          "public-posts/"
+        ];
+
+        if (buckets.some(bucket => path.startsWith(bucket))) {
+          url = new URL(
+            "/storage/v1/object/public/" + path,
+            supabaseUrl
+          );
+        } else {
+          return "";
+        }
+      }
+
+      if (!["https:", "http:"].includes(url.protocol)) {
         return "";
       }
-      // Do not use a video file as the social preview image.
-      if (/\.(mp4|mov|webm|m3u8|avi)(?:$|[?#])/i.test(url.href)) {
+
+      if (/\.(mp4|mov|webm|m3u8|avi|mkv)(?:$|[?#])/i.test(url.href)) {
         return "";
       }
+
       return url.href;
     } catch {
       return "";
     }
   }
 
-  async function readTable(table, fields, filters = {}) {
-    const url = new URL(`/rest/v1/${table}`, supabaseUrl);
-    url.searchParams.set("select", fields);
-    url.searchParams.set("id", `eq.${id}`);
-    url.searchParams.set("limit", "1");
+  async function readTable(table, fieldSets) {
+    let lastError = "";
 
-    for (const [key, value] of Object.entries(filters)) {
-      url.searchParams.set(key, value);
-    }
+    for (const fields of fieldSets) {
+      const url = new URL(`/rest/v1/${table}`, supabaseUrl);
+      url.searchParams.set("select", fields);
+      url.searchParams.set("id", `eq.${id}`);
+      url.searchParams.set("limit", "1");
 
-    const response = await fetch(url, {
-      headers: {
-        apikey: anonKey,
-        Authorization: `Bearer ${anonKey}`
+      const response = await fetch(url, {
+        headers: {
+          apikey: anonKey,
+          Authorization: `Bearer ${anonKey}`
+        }
+      });
+
+      if (!response.ok) {
+        lastError = await response.text();
+        console.error(
+          `Supabase read failed: ${table}; fields=${fields}; status=${response.status}; details=${lastError}`
+        );
+        continue;
       }
-    });
 
-    if (!response.ok) {
-      throw new Error(`Database read failed: ${table}`);
+      const rows = await response.json();
+      return rows[0] || null;
     }
 
-    const rows = await response.json();
-    return rows[0] || null;
+    throw new Error(
+      `Could not read ${table}. Last database error: ${lastError}`
+    );
+  }
+
+  async function readProductMedia() {
+    try {
+      const url = new URL("/rest/v1/product_media", supabaseUrl);
+      url.searchParams.set("select", "file_url");
+      url.searchParams.set("product_id", `eq.${id}`);
+      url.searchParams.set("is_public", "eq.true");
+      url.searchParams.set("limit", "10");
+
+      const response = await fetch(url, {
+        headers: {
+          apikey: anonKey,
+          Authorization: `Bearer ${anonKey}`
+        }
+      });
+
+      if (!response.ok) {
+        console.error(
+          "Product media lookup failed:",
+          response.status,
+          await response.text()
+        );
+        return "";
+      }
+
+      const rows = await response.json();
+
+      return (rows || [])
+        .map(row => validImage(row.file_url))
+        .find(Boolean) || "";
+    } catch (error) {
+      console.error("Product media lookup error:", error);
+      return "";
+    }
   }
 
   try {
     let item;
     let image = "";
 
-    
-if (type === "job") {
-  item = await readTable(
-    "jobs",
-    "id,title,company,description,image_url,thumbnail_url,media_url,video_url,is_public"
-  );
+    if (type === "job") {
+      item = await readTable("jobs", [
+        "id,title,company,description,image_url,thumbnail_url,media_url,video_url,is_public",
+        "id,title,company,description,image,thumbnail_url,media_url,video_url,is_public",
+        "id,title,company,description,image,video,file_url,is_public",
+        "id,title,company,description,media_url,is_public"
+      ]);
 
-  if (!item || item.is_public !== true) {
-    return {
-      statusCode: 404,
-      body: "Public job not found."
-    };
-  }
-
-  // Try each possible job image field.
-  image =
-    validImage(item.thumbnail_url) ||
-    validImage(item.image_url) ||
-    validImage(item.media_url) ||
-    "";
-
-  // If the job image is stored in a related media record,
-  // try the existing public product_media table as a fallback.
-  if (!image) {
-    const mediaUrl = new URL(
-      "/rest/v1/product_media",
-      supabaseUrl
-    );
-    mediaUrl.searchParams.set("select", "file_url");
-    mediaUrl.searchParams.set("product_id", `eq.${id}`);
-    mediaUrl.searchParams.set("is_public", "eq.true");
-    mediaUrl.searchParams.set("limit", "10");
-
-    const response = await fetch(mediaUrl, {
-      headers: {
-        apikey: anonKey,
-        Authorization: `Bearer ${anonKey}`
+      if (!item || item.is_public !== true) {
+        return {
+          statusCode: 404,
+          headers: {
+            "Cache-Control": "no-store"
+          },
+          body: "Public job not found."
+        };
       }
-    });
 
-    if (response.ok) {
-      const media = await response.json();
-      image = (media || [])
-        .map(row => validImage(row.file_url))
-        .find(Boolean) || "";
-    }
-  }
-} else {
+      image =
+        validImage(item.thumbnail_url) ||
+        validImage(item.image_url) ||
+        validImage(item.image) ||
+        validImage(item.media_url) ||
+        validImage(item.file_url) ||
+        validImage(item.video_url) ||
+        "";
+
+    } else {
+      item = await readTable("products", [
+        "id,name,title,description,image_url,image_urls,thumbnail_url,media_url,is_public",
+        "id,name,title,description,image_url,thumbnail_url,media_url,is_public",
+        "id,name,title,description,image,thumbnail_url,media_url,is_public",
+        "id,name,title,description,image,is_public"
+      ]);
+
+      if (!item || item.is_public === false) {
+        return {
+          statusCode: 404,
+          headers: {
+            "Cache-Control": "no-store"
+          },
+          body: "Public product not found."
+        };
+      }
+
+      const imageList = Array.isArray(item.image_urls)
+        ? item.image_urls
+        : [];
+
+      image =
+        validImage(item.thumbnail_url) ||
+        validImage(item.image_url) ||
+        validImage(item.image) ||
+        validImage(item.media_url) ||
+        imageList.map(validImage).find(Boolean) ||
+        "";
+
+      // Preserve the existing product-media fallback.
+      if (!image) {
+        image = await readProductMedia();
+      }
     }
 
     const title = type === "job"
@@ -126,7 +221,6 @@ if (type === "job") {
     const description = item.description ||
       "Reba amakuru arambuye kuri Trcose Market.";
 
-    // Keep the correct destination format for each type.
     const destination = type === "job"
       ? new URL(
           `job.html?job=${encodeURIComponent(id)}`,
@@ -137,7 +231,9 @@ if (type === "job") {
           "https://market-co.github.io/Trcose/"
         );
 
-    const shareUrl = event.rawUrl || destination.href;
+    const shareUrl = new URL(
+      event.rawUrl || destination.href
+    ).href;
 
     const html = `<!doctype html>
 <html lang="rw">
@@ -156,6 +252,7 @@ if (type === "job") {
 ${image ? `
 <meta property="og:image" content="${esc(image)}">
 <meta property="og:image:secure_url" content="${esc(image)}">
+<meta property="og:image:type" content="image/jpeg">
 <meta name="twitter:image" content="${esc(image)}">
 ` : ""}
 <meta name="twitter:card" content="${image ? "summary_large_image" : "summary"}">
@@ -165,9 +262,10 @@ ${image ? `
 <meta http-equiv="refresh" content="1;url=${esc(destination.href)}">
 </head>
 <body>
-<p>Urimo gufungura <a href="${esc(destination.href)}">Trcose Market</a>...</p>
+<p>Urimo gufungura
+<a href="${esc(destination.href)}">Trcose Market</a>...</p>
 <script>
-  location.replace(${JSON.stringify(destination.href)});
+location.replace(${JSON.stringify(destination.href)});
 </script>
 </body>
 </html>`;
@@ -180,6 +278,7 @@ ${image ? `
       },
       body: html
     };
+
   } catch (error) {
     console.error("Share function error:", error);
 
