@@ -72,7 +72,7 @@ exports.handler = async function (event) {
     if (type === "job") {
       item = await readTable(
         "jobs",
-        "id,title,company,description,image_url,media_url,video_url,is_public"
+        "id,title,company,description,image_url,thumbnail_url,media_url,video_url,is_public"
       );
 
       if (!item || item.is_public !== true) {
