@@ -114,68 +114,32 @@ exports.handler = async function (event) {
     const shareUrl =
       `https://trcose.netlify.app/.netlify/functions/share?type=${type}&id=${encodeURIComponent(id)}`;
 
-    const safeImage =
-      typeof image === "string" && /^https:\/\//i.test(image.trim())
-        ? image.trim()
-        : "";
+    const safeImage = typeof image === "string" && /^https:\/\//i.test(image.trim()) ? image.trim() : ""; const userAgent = event.headers?.["user-agent"] || event.headers?.["User-Agent"] || ""; const isPreviewBot = /whatsapp|facebookexternalhit|facebot|twitterbot|xbot|telegrambot|linkedinbot|slackbot|discordbot|skypeuripreview|pinterest|googlebot|bingbot|redditbot|tumblr|vkshare|viber|line-poker|applebot|embedly|quora link preview|iframely|outbrain|flipboard|bitlybot/i .test(userAgent);
 
-    const userAgent = event.headers?.["user-agent"] ||
-      event.headers?.["User-Agent"] || "";
-
-    const isPreviewBot =
-      /whatsapp|facebookexternalhit|facebot|twitterbot|telegrambot|linkedinbot|slackbot|discordbot|skypeuripreview|pinterest|googlebot|bingbot/i
-        .test(userAgent);
-
-    // Abantu basanzwe bahita bajya ku rupapuro nyarwo.
-    if (!isPreviewBot) {
-      return {
-        statusCode: 302,
-        headers: {
-          Location: destination,
-          "Cache-Control": "no-store"
-        },
-        body: ""
-      };
-    }
+// Abantu basanzwe bajya ku rupapuro nyarwo.
+if (!isPreviewBot) {
+  return {
+    statusCode: 302,
+    headers: {
+      Location: destination,
+      "Cache-Control": "no-store"
+    },
+    body: ""
+  };
+}
 
     // Ama-bot abona amakuru ya Open Graph kugira ngo yerekane preview.
-    const html = `<!doctype html>
-<html lang="rw">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(title)} | Trcose Market</title>
-<meta name="description" content="${esc(description.slice(0, 300))}">
-<meta property="og:site_name" content="Trcose Market">
-<meta property="og:type" content="website">
-<meta property="og:title" content="${esc(title)}">
-<meta property="og:description" content="${esc(description.slice(0, 300))}">
-<meta property="og:url" content="${esc(shareUrl)}">
-${safeImage ? `
-<meta property="og:image" content="${esc(safeImage)}">
-<meta property="og:image:secure_url" content="${esc(safeImage)}">
-<meta property="og:image:alt" content="${esc(title)}">
-<meta name="twitter:image" content="${esc(safeImage)}">
-` : ""}
-<meta name="twitter:card" content="${safeImage ? "summary_large_image" : "summary"}">
-<meta name="twitter:title" content="${esc(title)}">
-<meta name="twitter:description" content="${esc(description.slice(0, 300))}">
-<meta http-equiv="refresh" content="0;url=${esc(destination)}">
-</head>
-<body>
-<h1>${esc(title)}</h1>
-<p>${esc(description)}</p>
-${safeImage ? `<img src="${esc(safeImage)}" alt="${esc(title)}" style="max-width:100%;height:auto">` : ""}
-<p><a href="${esc(destination)}">Fungura kuri Trcose Market</a></p>
-</body>
-</html>`;
+    
+<WritingBlock id="73618" variant="standard"> const html = `
 
+`;</WritingBlock>
     return {
       statusCode: 200,
       headers: {
         "Content-Type": "text/html; charset=utf-8",
         "Cache-Control": "public, max-age=60"
       },
+      
       body: html
     };
   } catch (error) {
