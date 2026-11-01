@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#1769ff">
 <title>Trcose — Job Portal</title>
-<meta name="application-name" content="Trcose">
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#172033}
@@ -101,11 +100,11 @@ html, body { top:0 !important; margin-top:0 !important; }
 </style>
 </head>
 <body class="job-standalone">
-<div class="jobPortalHead"><div><div class="jobPortalTitle notranslate" translate="no">💼 Job Portal</div><div class="muted">Akazi, candidates n'ibizamini</div></div><div class="jobPortalActions"><button class="secondary" onclick="goToTrcoseAdmin()">🛡️ Admin</button><button class="secondary" onclick="window.open('https://wa.me/qr/SXDKDSH3MW7NO1','_blank','noopener')">💬 Support</button><label class="jobLanguageWrap" aria-label="Choose language">🌐 <select id="jobTopLanguageSelect" onchange="changeLanguage(this.value)" aria-label="Language"><option value="rw">🇷🇼 RW</option><option value="en">🇬🇧 EN</option><option value="fr">🇫🇷 FR</option><option value="sw">🇹🇿 SW</option><option value="es">🇪🇸 ES</option><option value="pt">🇵🇹 PT</option><option value="de">🇩🇪 DE</option><option value="ar">🇸🇦 AR</option></select></label><button onclick="window.location.href='index.html'">🏠 Home</button></div></div>
+<div class="jobPortalHead"><div><div class="jobPortalTitle">💼 Job Portal</div><div class="muted">Akazi, candidates n'ibizamini</div></div><div class="jobPortalActions"><button class="secondary" onclick="goToTrcoseAdmin()">🛡️ Admin</button><button class="secondary" onclick="window.open('https://wa.me/qr/SXDKDSH3MW7NO1','_blank','noopener')">💬 Support</button><label class="jobLanguageWrap" aria-label="Choose language">🌐 <select id="jobTopLanguageSelect" onchange="changeLanguage(this.value)" aria-label="Language"><option value="rw">🇷🇼 RW</option><option value="en">🇬🇧 EN</option><option value="fr">🇫🇷 FR</option><option value="sw">🇹🇿 SW</option><option value="es">🇪🇸 ES</option><option value="pt">🇵🇹 PT</option><option value="de">🇩🇪 DE</option><option value="ar">🇸🇦 AR</option></select></label><button onclick="window.location.href='index.html'">🏠 Home</button></div></div>
 <header>
  <div class="head">
   <div class="top">
-   <div class="logo notranslate" translate="no"><span class="notranslate" translate="no">Trcose</span> Market 🛍️</div>
+   <div class="logo">Trcose Market 🛍️</div>
    <div class="topActions">
     <a class="supportTopBtn" href="https://wa.me/qr/SXDKDSH3MW7NO1" target="_blank" rel="noopener noreferrer" aria-label="Contact Trcose Support">💬 Support</a>
     <label class="topLanguageWrap" aria-label="Choose website language"><span aria-hidden="true">🌐</span><select id="topLanguageSelect" aria-label="Choose language" onchange="changeLanguage(this.value)"><option value="rw">RW</option><option value="en">EN</option><option value="fr">FR</option><option value="sw">SW</option><option value="es">ES</option><option value="pt">PT</option><option value="de">DE</option><option value="ar">AR</option></select></label>
@@ -296,7 +295,8 @@ html, body { top:0 !important; margin-top:0 !important; }
    <h3>🛒 Product ya mbere / verification</h3><p>Kwishyura $1 ku product ya mbere kugira ngo isuzumwe. Account iba verified gusa Admin cyangwa payment gateway imaze kwemeza payment.</p>
    <button onclick="startPayment('first_product_verification',1)">💳 Pay $1 – Verify first product</button>
    <h3>🎓 Exam Job</h3><p>Nyuma yo kurangiza ibibazo by’imyitwarire y’umukozi, ushobora gusaba gufungurirwa ikizamini cya job. Admin ni we ushyiraho ikizamini.</p>
-   <button onclick="startPayment('exam_job',8)">💳 Pay $8 – Exam Job</button>
+   <p>Hitamo igiciro cy'ikizamini cya Job. Admin ni we wemeza ubwishyu mbere yo kuguha uburenganzira.</p>
+   <div class="smallgrid"><button onclick="startPayment('exam_job',3000)">💳 3,000 RWF</button><button onclick="startPayment('exam_job',5000)">💳 5,000 RWF</button><button onclick="startPayment('exam_job',8000)">💳 8,000 RWF</button></div>
    <div id="examJobStatus" class="notice" style="margin-top:10px">Wait your work — utegereze ko payment na exam access byemezwa.</div>
   </div>
  </section>
@@ -641,11 +641,12 @@ async function shareItem(title,url){
  }catch(e){}
  prompt("Kopora link ya Trcose:",safeUrl);
 }
+function trcoseShareUrl(type,id){const u=new URL("https://trcose.netlify.app/.netlify/functions/share");u.searchParams.set("type",String(type));u.searchParams.set("id",String(id));return u.toString()}
 function shareProduct(id){
  const p=products.find(x=>String(x.id)===String(id))||demoProducts.find(x=>String(x.id)===String(id));
  if(!p){alert("Igicuruzwa nticyabonetse.");return;}
- const url=new URL("https://market-co.github.io/Trcose/");url.searchParams.set("product",String(p.id));
- shareItem(p.name||"Trcose Product",url.href);
+ if(String(id).startsWith("demo")){alert("Iyi ni demo product; share ikora kuri product iri muri Supabase.");return;}
+ shareItem(p.name||"Trcose Product",trcoseShareUrl("product",p.id));
 }
 function shareReferral(){
  const c=$("myReferralCode")?.textContent?.trim()||"";
@@ -676,7 +677,7 @@ async function publishProduct(){
 }
 
 function startPayment(purpose,amount,productId=null){
- if(!user){openAuth();return}paymentPurpose={type:purpose,productId,amount:Number(amount)};const usdPurposes=["listing","first_product_verification","exam","exam_job"];
+ if(!user){openAuth();return}paymentPurpose={type:purpose,productId,amount:Number(amount)};const usdPurposes=["listing","first_product_verification"];
  $("paymentDescription").innerHTML=`Payment: <b>${escapeHTML(purpose)}</b><br>Amount: <b>${usdPurposes.includes(purpose)?"$"+Number(amount).toFixed(2)+" USD":money(amount)}</b>`;$("paymentMessage").textContent="";$("paymentModal").classList.add("show")
 }
 function closePayment(){$("paymentModal").classList.remove("show")}
@@ -779,11 +780,7 @@ function openJobDetails(id){
 }
 async function toggleMyJob(id,makePublic){if(!user){openAuth();return}const {data,error}=await supabaseClient.from("jobs").update({is_public:!!makePublic,status:makePublic?"published":"hidden"}).eq("id",id).eq("user_id",user.id).select().maybeSingle();if(error||!data){alert("Ntibyashobotse guhindura public/private. Reba RLS policies za jobs.");return}await loadPublicJobs();alert(makePublic?"Job yashyizwe public.":"Job yakuwe public.");closeJobDetails()}async function deleteMyJob(id){if(!user||!confirm("Urasiba aka kazi burundu?"))return;const {data,error}=await supabaseClient.from("jobs").delete().eq("id",id).eq("user_id",user.id).select().maybeSingle();if(error||!data){alert("Ntibyashobotse gusiba job. Reba RLS policies za jobs.");return}await loadPublicJobs();alert("Job yasibwe.");closeJobDetails()}
 function closeJobDetails(){$("jobDetailPanel").classList.add("hidden");if(new URLSearchParams(location.search).has("job"))history.replaceState({},"",location.pathname)}
-function jobShareUrl(id){
- const u=new URL("https://market-co.github.io/Trcose/job.html");
- u.searchParams.set("job",String(id));
- return u.toString();
-}
+function jobShareUrl(id){return trcoseShareUrl("job",id)}
 function shareJob(id){const j=publicJobsCache.find(x=>String(x.id)===String(id));const url=jobShareUrl(id);shareItem(j?.title||"Trcose Job",url)}
 function shareJobPlatform(platform,id){const j=publicJobsCache.find(x=>String(x.id)===String(id));const url=jobShareUrl(id);const title=j?.title||"Job opportunity on Trcose";const text=`${title} — Reba aka kazi kuri Trcose: ${url}`;let target="";if(platform==="whatsapp")target="https://wa.me/?text="+encodeURIComponent(text);else if(platform==="facebook")target="https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(url);else if(platform==="telegram")target="https://t.me/share/url?url="+encodeURIComponent(url)+"&text="+encodeURIComponent(title);if(target)window.open(target,"_blank","noopener,noreferrer")}
 async function copyJobLink(id){const url=jobShareUrl(id);try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(url)}else{const ta=document.createElement("textarea");ta.value=url;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove()}alert("Link y'akazi yakopiwe. Yishyire kuri WhatsApp, Facebook, Telegram cyangwa ahandi.")}catch(e){prompt("Kopora link y'akazi:",url)}}
@@ -822,7 +819,7 @@ async function submitJobApplication(jobId){
  if(already){if(box)box.innerHTML=`<div class="notice">Usanzwe warasabye aka kazi. Status yawe: <b>${escapeHTML(already.status)}</b>.</div>`;await refreshMyJobApplications(jobId);return;}
  const payload={job_id:jobId,applicant_id:user.id,full_name,email,phone:phone||null,telephone:phone||null,cover_letter:cover_letter||null,message:cover_letter||null,resume_url:resume_url||null,cv_link:resume_url||null,cv_url:resume_url||null,status:"submitted"};
  const {error}=await supabaseClient.from("job_applications").insert(payload);
- if(error){if(box)box.innerHTML=`<p class="error">Ubusabe ntibwoherejwe: ${escapeHTML(error.message)}. Reba ko SQL ya Trcose-Job-Application-Exam-SQL.sql yarangiye neza, kandi payment ya 1,000 RWF iri kuri verified.</p>`;return;}
+ if(error){if(box)box.innerHTML=`<p class="error">Request nt yoherejwe: ${escapeHTML(error.message)}.</p>`;return;}
  if(box)box.innerHTML='<p class="success">✅ Ubusabe bwoherejwe. Admin azabusuzuma; uzabona status hano.</p>';
  await refreshMyJobApplications(jobId);
 }
