@@ -272,7 +272,8 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
  <div class="panel">
   <h3 data-i18n="job_exam_title">📝 Ikizamini cyo ku murongo</h3>
   <p class="notice" data-i18n="job_exam_notice">Ikizamini gifunguka gusa iyo ubwishyu bwemejwe kandi hashize amasaha 24.</p>
-  <button onclick="startPayment('exam',8)">💳 <span data-i18n="job_exam_pay">Ishyura $8 → Tegura ikizamini cy'akazi</span></button>
+  <p>Hitamo amafaranga y'ikizamini. Ubwo wishyuye, Admin agenzura ubwishyu mbere yo gufungura ikizamini.</p>
+  <div class="smallgrid"><button onclick="startPayment('exam',3000)">💳 3,000 RWF</button><button onclick="startPayment('exam',5000)">💳 5,000 RWF</button><button onclick="startPayment('exam',8000)">💳 8,000 RWF</button></div>
   <div id="examWaiting" class="hidden notice"></div>
   <button id="examButton" class="hidden" onclick="openExam()">🔐 <span data-i18n="job_exam_open">Fungura ikizamini</span></button>
  </div>
@@ -297,7 +298,8 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
    <h3>🛒 Product ya mbere / verification</h3><p>Kwishyura $1 ku product ya mbere kugira ngo isuzumwe. Account iba verified gusa Admin cyangwa payment gateway imaze kwemeza payment.</p>
    <button onclick="startPayment('first_product_verification',1)">💳 Pay $1 – Verify first product</button>
    <h3>🎓 Exam Job</h3><p>Nyuma yo kurangiza ibibazo by’imyitwarire y’umukozi, ushobora gusaba gufungurirwa ikizamini cya job. Admin ni we ushyiraho ikizamini.</p>
-   <button onclick="startPayment('exam_job',8)">💳 Pay $8 – Exam Job</button>
+   <p>Hitamo igiciro cy'ikizamini cya Job. Admin ni we wemeza ubwishyu mbere yo kuguha uburenganzira.</p>
+   <div class="smallgrid"><button onclick="startPayment('exam_job',3000)">💳 3,000 RWF</button><button onclick="startPayment('exam_job',5000)">💳 5,000 RWF</button><button onclick="startPayment('exam_job',8000)">💳 8,000 RWF</button></div>
    <div id="examJobStatus" class="notice" style="margin-top:10px">Wait your work — utegereze ko payment na exam access byemezwa.</div>
   </div>
  </section>
@@ -705,8 +707,9 @@ async function shareItem(title,url){
  const copied=await copyTextFallback(String(url));
  alert(copied?"Link yakopiwe. Ushobora kuyishyira muri WhatsApp cyangwa ahandi.":"Ntibyashobotse gukopa link. Yifungure muri address bar uyikopore.");
 }
-function shareProduct(id){const p=products.find(x=>String(x.id)===String(id))||demoProducts.find(x=>String(x.id)===String(id));if(p)shareItem((p.name||"Trcose Product")+" — Trcose Market",location.href.split("?")[0]+"?product="+encodeURIComponent(id))}
-async function shareVideoPost(id){try{await supabaseClient.from("product_events").insert({product_id:id,event_type:"share",user_id:user?.id||null})}catch(e){} const p=products.find(x=>x.id===id);if(p)shareItem(p.name||"Trcose Video",location.href.split("?")[0]+"?product="+encodeURIComponent(id));await loadFreeVideoPosts();if(user)await loadMyVideoStats()}
+function trcoseShareUrl(type,id){const u=new URL("https://trcose.netlify.app/.netlify/functions/share");u.searchParams.set("type",String(type));u.searchParams.set("id",String(id));return u.toString()}
+function shareProduct(id){const p=products.find(x=>String(x.id)===String(id))||demoProducts.find(x=>String(x.id)===String(id));if(!p){alert("Igicuruzwa nticyabonetse.");return}if(String(id).startsWith("demo")){alert("Iyi ni demo product; share ikora kuri product iri muri Supabase.");return}shareItem((p.name||"Trcose Product")+" — Trcose Market",trcoseShareUrl("product",id))}
+async function shareVideoPost(id){try{await supabaseClient.from("product_events").insert({product_id:id,event_type:"share",user_id:user?.id||null})}catch(e){} const p=products.find(x=>String(x.id)===String(id));if(p)shareItem(p.name||"Trcose Video",trcoseShareUrl("product",id));await loadFreeVideoPosts();if(user)await loadMyVideoStats()}
 function shareReferral(){const c=$("myReferralCode")?.textContent?.trim()||"";shareItem("Trcose Referral "+c,location.href.split("?")[0]+"?ref="+encodeURIComponent(c))}
 
 async function loadProfile(){
@@ -732,7 +735,7 @@ async function publishProduct(){
 }
 
 function startPayment(purpose,amount,productId=null){
- if(!user){openAuth();return}paymentPurpose={type:purpose,productId,amount:Number(amount)};const usdPurposes=["listing","first_product_verification","exam","exam_job"];
+ if(!user){openAuth();return}paymentPurpose={type:purpose,productId,amount:Number(amount)};const usdPurposes=["listing","first_product_verification"];
  $("paymentDescription").innerHTML=`Payment: <b>${escapeHTML(purpose)}</b><br>Amount: <b>${usdPurposes.includes(purpose)?"$"+Number(amount).toFixed(2)+" USD":money(amount)}</b>`;$("paymentMessage").textContent="";$("paymentModal").classList.add("show")
 }
 function closePayment(){$("paymentModal").classList.remove("show")}
