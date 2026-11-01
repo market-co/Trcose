@@ -92,11 +92,42 @@ body.job-standalone .job-portal-note{display:block}
 .topLanguageWrap{display:inline-flex;align-items:center;gap:3px;background:#eaf1ff;color:#1769ff;border-radius:10px;padding:3px 5px}.topLanguageWrap select{width:auto;min-width:48px;border:0;padding:5px;background:transparent;color:#1769ff;font-weight:700}.supportTopBtn{display:inline-flex;align-items:center;text-decoration:none;background:#1769ff;color:#fff;border-radius:10px;padding:8px 10px;font-weight:700;font-size:12px}
 </style>
 <style>
-/* Google Translate stays available as an invisible engine; no toolbar/banner on the page. */
-.goog-te-banner-frame, .goog-te-banner-frame.skiptranslate, .goog-te-balloon-frame,
-#goog-gt-tt, .goog-te-spinner-pos, .goog-te-gadget-icon { display:none !important; visibility:hidden !important; }
-html, body { top:0 !important; margin-top:0 !important; }
-#google_translate_element { position:fixed !important; left:-10000px !important; top:0 !important; width:1px !important; height:1px !important; overflow:hidden !important; opacity:0 !important; pointer-events:none !important; z-index:-1 !important; }
+/* Google Translate remains the translation engine, but its toolbar, popup and injected frame stay hidden. */
+.goog-te-banner-frame,
+.goog-te-banner-frame.skiptranslate,
+iframe.goog-te-banner-frame,
+.goog-te-balloon-frame,
+.goog-te-menu-frame,
+.goog-te-gadget,
+.goog-te-gadget-icon,
+.goog-te-spinner-pos,
+#goog-gt-tt,
+.goog-tooltip,
+.goog-tooltip:hover,
+body > .skiptranslate,
+.skiptranslate > iframe {
+  display:none !important;
+  visibility:hidden !important;
+  height:0 !important;
+  max-height:0 !important;
+}
+html, body {
+  top:0 !important;
+  margin-top:0 !important;
+  position:static !important;
+}
+body { min-height:100% !important; }
+#google_translate_element {
+  position:fixed !important;
+  left:-10000px !important;
+  top:0 !important;
+  width:1px !important;
+  height:1px !important;
+  overflow:hidden !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+  z-index:-1 !important;
+}
 </style>
 </head>
 <body class="job-standalone">
