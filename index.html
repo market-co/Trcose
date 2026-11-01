@@ -92,6 +92,7 @@ header{background:#fff;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px #
 
 .profileHero{border:1px solid #e4ebf8;background:linear-gradient(180deg,#fff,#f8faff)}.profileVideoStats{margin-top:16px;padding:14px;border:1px solid #e1e9f8;border-radius:16px;background:#fbfcff}.profileVideoStats h3{margin-top:0;color:#1769ff}.profileVideoStats .stat{background:#eef4ff;border:1px solid #e1eaff}.videoFeed{margin-top:22px}.videoComposer{background:#fff;border:1px solid #dfe5ef;border-radius:16px;padding:15px;margin:12px 0}.videoPost{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 3px 15px #0001;margin:12px 0}.videoPost video{width:100%;max-height:520px;background:#111;display:block}.videoPost .body{padding:14px}.phoneMasked{font-size:12px;color:#707887}.adminRequest{border:1px solid #dfe5ef;border-radius:12px;padding:12px;margin:10px 0}
 .notificationBell{position:relative}.notificationBadge{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;padding:0 5px;border-radius:20px;background:#e53935;color:#fff;font-size:11px;line-height:19px;font-weight:700;text-align:center;border:2px solid #fff}.googleLoginBtn{min-height:48px;border-radius:10px;font-size:15px;font-weight:600;transition:box-shadow .15s ease}.googleLoginBtn:active{box-shadow:0 1px 2px #0002}.googleLoginBtn svg{flex:0 0 22px}.loginBox input{width:100%;margin:5px 0 10px;padding:12px;border-radius:9px;border:1px solid #d7dce5}
+.publicFeed{margin-top:18px}.feedHeading{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.feedHeading h2,.feedHeading h3{margin:0}.feedSortLabel{background:#fff0d8;color:#9a5700;border-radius:20px;padding:7px 11px;font-size:12px;font-weight:800}.feedList{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:13px;margin-top:12px}.feedCard{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 3px 15px #0001;border:1px solid #e8edf5}.feedCard .feedMedia{width:100%;height:220px;display:block;object-fit:cover;background:#111}.feedCard .feedBody{padding:13px}.feedCard h3{margin:8px 0}.feedMeta{font-size:12px;color:#707887;margin:8px 0}.floatingVideoAdd{position:fixed;right:18px;bottom:22px;z-index:180;width:58px;height:58px;padding:0;border-radius:50%;font-size:36px;line-height:1;box-shadow:0 5px 18px #0003;border:3px solid #fff}.videoComposerFloating{position:fixed;right:14px;bottom:92px;z-index:190;width:min(440px,calc(100vw - 28px));max-height:75vh;overflow:auto;box-shadow:0 8px 35px #0003}.feedEmpty{background:#fff;padding:18px;border-radius:14px;color:#707887}
 </style>
 <style>
 /* Google Translate stays available as an invisible engine; no toolbar/banner on the page. */
@@ -147,7 +148,7 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
   <p class="compatNotice">Trcose yateguwe kuri mobile. Images zikoresha lazy-load kandi features zishobora kubura kuri browser ishaje zigira fallback.</p>
  </div>
  <div class="panel">
-<input id="searchBox" data-i18n-placeholder="search" placeholder="🔎 Shakisha product, category cyangwa aho iherereye..." oninput="renderProducts()">
+<input id="searchBox" data-i18n-placeholder="search" placeholder="🔎 Shakisha product, category cyangwa aho iherereye..." oninput="loadMixedPublicFeed()">
      <div class="chips" style="margin-top:8px">
    <button class="chip" onclick="filterCategory('')">Byose</button>
    <button class="chip" onclick="filterCategory('Telefone')">Telefone</button>
@@ -158,28 +159,23 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
   </div>
  </div>
  <div id="publicAds"></div>
- <h2 data-i18n="products">🛍️ Ibicuruzwa</h2>
- <div id="products" class="grid"></div>
-
- <section class="videoFeed" aria-labelledby="freeVideoTitle">
-  <h2 id="freeVideoTitle">🎬 Video Posts</h2>
-  <p class="muted">Reba video za Trcose Market, ukurikire abashyiraho content kandi ubisangize abandi.</p>
-  <button id="videoToolsToggle" type="button" onclick="toggleVideoTools()">✨ Get More Views / Follow / Get Monetized</button>
-  <div id="videoToolsPanel" class="videoComposer hidden">
-   <h3>📤 Shyiraho Video</h3>
-   <input id="videoPostName" maxlength="100" placeholder="Umutwe wa video">
-   <textarea id="videoPostDescription" maxlength="1500" placeholder="Ibisobanuro bigufi (si ngombwa)"></textarea>
-   <label for="videoPostFile">Hitamo video</label><input id="videoPostFile" type="file" accept="video/*">
-   <label for="videoThumbnailFile">Thumbnail (si ngombwa)</label><input id="videoThumbnailFile" type="file" accept="image/png,image/jpeg,image/webp,image/*">
-   <p class="muted">Nudahitemo thumbnail, Trcose izagerageza gufata ifoto iri hagati muri video.</p>
-   <button onclick="publishFreeVideoPost()">📤 Publish Video</button>
-   <button class="secondary" onclick="showPage('profile')">👤 Profile & Followers</button>
-   <button class="secondary" onclick="showPage('monetization')">💰 Get Monetized</button>
-   <button class="secondary" onclick="toggleVideoTools(false)">Funga ibikoresho</button>
-   <p id="videoPostMessage" class="muted" role="status"></p>
-  </div>
-  <div id="videoPosts"><p class="muted">Turimo gushaka video posts...</p></div>
+ <section class="publicFeed" aria-labelledby="publicFeedTitle">
+  <div class="feedHeading"><div><h2 id="publicFeedTitle">🌐 Public Feed</h2><p class="muted">Products na Videos bivanze. Ibyarebwe cyane bishobora kugaragara hejuru.</p></div><span class="feedSortLabel">🔥 Trending</span></div>
+  <div id="publicFeed"><p class="muted">Turimo gutegura Public Feed...</p></div>
  </section>
+ <button id="videoToolsToggle" class="floatingVideoAdd" type="button" onclick="toggleVideoTools()" aria-label="Shyiraho video" title="Shyiraho video">＋</button>
+ <div id="videoToolsPanel" class="videoComposer videoComposerFloating hidden">
+  <div class="feedHeading"><h3>📤 Shyiraho Video</h3><button class="secondary" type="button" onclick="toggleVideoTools(false)">✕</button></div>
+  <input id="videoPostName" maxlength="100" placeholder="Umutwe wa video">
+  <textarea id="videoPostDescription" maxlength="1500" placeholder="Ibisobanuro bigufi (si ngombwa)"></textarea>
+  <label for="videoPostFile">Hitamo video</label><input id="videoPostFile" type="file" accept="video/*">
+  <label for="videoThumbnailFile">Thumbnail (si ngombwa)</label><input id="videoThumbnailFile" type="file" accept="image/png,image/jpeg,image/webp,image/*">
+  <p class="muted">Nudahitemo thumbnail, Trcose izagerageza gufata ifoto iri hagati muri video.</p>
+  <button onclick="publishFreeVideoPost()">📤 Publish Video</button>
+  <button class="secondary" onclick="showPage('profile')">👤 Profile & Followers</button>
+  <button class="secondary" onclick="showPage('monetization')">💰 Get Monetized</button>
+  <p id="videoPostMessage" class="muted" role="status"></p>
+ </div>
 </section>
 
 <section id="sellPage" class="page hidden">
@@ -546,7 +542,7 @@ const demoJobs=[
 function $(id){return document.getElementById(id)}
 function money(n){return Number(n||0).toLocaleString("en-US")+" RWF"}
 function escapeHTML(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-function filterCategory(c){$("searchBox").value=c;renderProducts()}
+function filterCategory(c){$("searchBox").value=c;renderProducts();loadMixedPublicFeed()}
 function closeModal(id){$(id)?.classList.remove("show")}
 function openAuth(){$("authModal").classList.add("show")}
 function closeAuth(){$("authModal").classList.remove("show")}
@@ -581,8 +577,8 @@ async function updateAdminUI(){$("adminNavBtn").style.display=await isTrcoseAdmi
 async function refreshUser(){const {data}=await supabaseClient.auth.getUser();user=data.user||null;await updateAdminUI();if(user){await loadProfile();await loadWallet();await loadTrcosePublicMessages(false)}}
 async function init(){
  const {data}=await supabaseClient.auth.getSession();user=data.session?.user||null;await updateAdminUI();startTrcosePresence();
- supabaseClient.auth.onAuthStateChange((event,session)=>{const nextUser=session?.user||null;const presenceIdentityChanged=(user?.id||null)!==(nextUser?.id||null);user=nextUser;if(presenceIdentityChanged)startTrcosePresence();if(event==="PASSWORD_RECOVERY"){$("passwordRecoveryModal")?.classList.add("show");closeAuth()}setTimeout(async()=>{await updateAdminUI();if(user){await loadProfile();await loadFollowStats();await loadProfileFollowers();await loadMyPosts();await loadTrcosePublicMessages(false)}renderProducts();loadFreeVideoPosts()},0)});
- await loadProducts();renderProducts();if(user){await loadProfile();await refreshJobAccess();await refreshExamAccess()}
+ supabaseClient.auth.onAuthStateChange((event,session)=>{const nextUser=session?.user||null;const presenceIdentityChanged=(user?.id||null)!==(nextUser?.id||null);user=nextUser;if(presenceIdentityChanged)startTrcosePresence();if(event==="PASSWORD_RECOVERY"){$("passwordRecoveryModal")?.classList.add("show");closeAuth()}setTimeout(async()=>{await updateAdminUI();if(user){await loadProfile();await loadFollowStats();await loadProfileFollowers();await loadMyPosts();await loadTrcosePublicMessages(false)}renderProducts();loadMixedPublicFeed();loadFreeVideoPosts()},0)});
+ await loadProducts();renderProducts();await loadMixedPublicFeed();if(user){await loadProfile();await refreshJobAccess();await refreshExamAccess()}
  // Open a product when someone visits a shared Trcose link such as ?product=UUID.
  try{const sharedProductId=new URLSearchParams(window.location.search).get("product");if(sharedProductId){const sharedProduct=products.find(p=>String(p.id)===String(sharedProductId))||demoProducts.find(p=>String(p.id)===String(sharedProductId));if(sharedProduct){await openProduct(sharedProductId)}else{const details=$("productDetails");if(details)details.innerHTML="<div class='notice'>Iki gicuruzwa ntikiboneka kuri public cyangwa link si yo.</div>"}}}catch(e){console.warn("Shared product link error",e)}
  loadPublicAds();
@@ -677,6 +673,35 @@ function renderProducts(){
   <div class="actionRow"><button onclick="openProduct('${p.id}')">👀 View</button><button class="secondary" onclick="likeProduct('${p.id}')">❤️ Like</button><button class="secondary" onclick="buyProduct('${p.id}')">🛒 Buy</button><button class="secondary" onclick="shareProduct('${p.id}')">↗️ Share</button><button class="secondary" onclick="messageSeller('${escapeHTML(p.seller_id||"")}')">💬 Chat</button></div>
  </div></article>`).join(""):`<div class="panel">Nta products zirabonetse.</div>`;
  setTimeout(hydrateProductSellers,0)
+}
+// One shared public feed: active products and video posts are rendered together.
+async function loadMixedPublicFeed(){
+ const box=$("publicFeed");if(!box)return;
+ box.innerHTML='<p class="muted">Turimo kuzana posts...</p>';
+ try{
+  const {data,error}=await supabaseClient.from("products").select("*").eq("status","active").order("created_at",{ascending:false}).limit(80);
+  if(error)throw error;
+  const rows=(data||[]).filter(p=>p&&p.id);
+  const ids=rows.map(p=>p.id);
+  const viewCounts={};
+  if(ids.length){
+   const countResults=await Promise.all(rows.map(async p=>{
+    const r=await supabaseClient.from("product_events").select("id",{count:"exact",head:true}).eq("product_id",p.id).eq("event_type","view");
+    return [p.id,r.error?0:Number(r.count||0)];
+   }));
+   countResults.forEach(([id,count])=>viewCounts[id]=count);
+  }
+  const q=($("searchBox")?.value||"").toLowerCase().trim();
+  const visible=rows.filter(p=>!q||[p.name,p.category,p.city,p.description].join(" ").toLowerCase().includes(q));
+  visible.sort((a,b)=>(viewCounts[b.id]||0)-(viewCounts[a.id]||0)||new Date(b.created_at||0)-new Date(a.created_at||0));
+  if(!visible.length){box.innerHTML='<div class="feedEmpty">Nta posts za Public zihari. Shyiraho product cyangwa video ya mbere!</div>';return;}
+  box.innerHTML='<div class="feedList">'+visible.map(p=>{
+   const isVideo=String(p.category||"").toLowerCase()==="video"||String(p.media_type||"").toLowerCase()==="video";
+   const id=String(p.id).replace(/'/g,"\\'");
+   const media=isVideo?`<video class="feedMedia" controls playsinline preload="metadata" poster="${escapeHTML(p.thumbnail_url||"")}" src="${escapeHTML(p.media_url||p.image_url||"")}" onplay="recordVideoPostView('${id}')"></video>`:`<img class="feedMedia" loading="lazy" src="${escapeHTML(p.image_url||p.media_url||"https://via.placeholder.com/600x400?text=Trcose")}" alt="${escapeHTML(p.name||"Trcose product")}">`;
+   return `<article class="feedCard">${media}<div class="feedBody"><span class="badge">${isVideo?"🎬 Video":"🛍️ "+escapeHTML(p.category||"Product")}</span><h3 class="notranslate" translate="no">${escapeHTML(p.name||"Trcose post")}</h3>${isVideo?`<p>${escapeHTML(p.description||"")}</p>`:`<div class="price">${money(p.price)}</div><p>${escapeHTML(p.description||"")}</p><p class="muted">📍 ${escapeHTML(p.city||"")}</p>`}<div class="feedMeta">👀 ${viewCounts[p.id]||0} views · ${p.created_at?new Date(p.created_at).toLocaleDateString():""}</div><div class="actionRow"><button onclick="openProduct('${id}')">👀 View</button><button class="secondary" onclick="likeProduct('${id}')">❤️ Like</button><button class="secondary" onclick="${isVideo?`shareVideoPost('${id}')`:`shareProduct('${id}')`}">↗️ Share</button>${!isVideo?`<button class="secondary" onclick="buyProduct('${id}')">🛒 Buy</button>`:""}</div></div></article>`;
+  }).join("")+'</div>';
+ }catch(e){box.innerHTML=`<div class="notice">Public Feed ntishoboye kwikorera: ${escapeHTML(e?.message||"Reba internet na Supabase.")}</div>`;}
 }
 async function openProduct(id){
  const p=products.find(x=>x.id===id)||demoProducts.find(x=>x.id===id);if(!p)return;selectedProduct=p;
@@ -1013,7 +1038,7 @@ async function publishFreeVideoPost(){
   if(error)throw error;
   $("videoPostName").value="";$("videoPostDescription").value="";$("videoPostFile").value="";if($("videoThumbnailFile"))$("videoThumbnailFile").value="";
   box.textContent=thumbnailUrl?"Video yashyizwe public kandi thumbnail irahari.":"Video yashyizwe public. Browser cyangwa Storage ntiyashoboye gukora thumbnail; video iracyakora kandi ushobora kongera kugerageza thumbnail.";
-  await loadProducts();renderProducts();await loadFreeVideoPosts();await loadMyPosts();await loadMyVideoStats();
+  await loadProducts();renderProducts();await loadMixedPublicFeed();await loadFreeVideoPosts();await loadMyPosts();await loadMyVideoStats();
   if(data?.id){try{history.replaceState(null,"",location.pathname+"?product="+encodeURIComponent(data.id))}catch(e){}}
  }catch(e){box.textContent="Ntibyashobotse gushyira video public: "+(e?.message||"Reba product-videos bucket, products columns na Supabase RLS policies.");}
  finally{if(publishBtn){publishBtn.disabled=false;publishBtn.textContent="📤 Publish Video"}}
