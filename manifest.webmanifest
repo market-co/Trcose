@@ -1,10 +1,10 @@
 
 {
   "id": "/Trcose/",
-  "name": "Trcose",
+  "name": "Trcose Market",
   "short_name": "Trcose",
   "description": "Trcose Market — marketplace, jobs, business tools and online exams.",
-  "lang": "en",
+  "lang": "rw",
   "dir": "ltr",
   "start_url": "/Trcose/",
   "scope": "/Trcose/",
