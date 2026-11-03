@@ -1,7 +1,7 @@
 
 {
   "id": "/Trcose/",
-  "name": "Trcose",
+  "name": "Trcose Market",
   "short_name": "Trcose",
   "description": "Trcose Market — marketplace, jobs, business tools and online exams.",
   "lang": "rw",
@@ -9,7 +9,7 @@
   "start_url": "/Trcose/",
   "scope": "/Trcose/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#ffffff",
   "theme_color": "#1769ff"
 }
