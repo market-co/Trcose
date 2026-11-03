@@ -1,0 +1,37 @@
+{
+  "id": "/Trcose/",
+  "name": "Trcose Market",
+  "short_name": "Trcose",
+  "description": "Trcose Market — marketplace, jobs, business tools and online exams.",
+  "start_url": "/Trcose/?source=pwa",
+  "scope": "/Trcose/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#1769ff",
+  "lang": "rw",
+  "icons": [
+    {
+      "src": "/Trcose/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/Trcose/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/Trcose/icons/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/Trcose/icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
