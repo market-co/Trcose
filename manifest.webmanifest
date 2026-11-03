@@ -1,15 +1,15 @@
 
 {
-  "background_color": "#ffffff",
-  "description": "Trcose Market - Marketplace, jobs, business tools and online exams.",
-  "dir": "ltr",
-  "display": "standalone",
+  "id": "/Trcose/",
   "name": "Trcose",
-  "orientation": "portrait",
-  "scope": "https://market-co.github.io/Trcose/",
   "short_name": "Trcose",
-  "start_url": "https://market-co.github.io/Trcose/",
-  "theme_color": "#1769ff",
-  "id": "https://market-co.github.io/Trcose/",
-  "lang": "rw"
+  "description": "Trcose Market — marketplace, jobs, business tools and online exams.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "/Trcose/",
+  "scope": "/Trcose/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#1769ff"
 }
