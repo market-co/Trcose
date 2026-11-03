@@ -1,0 +1,15 @@
+
+{
+  "background_color": "#ffffff",
+  "description": "Trcose Market — marketplace, jobs, business tools and online exams.",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Trcose",
+  "orientation": "portrait",
+  "scope": "https://market-co.github.io/Trcose/",
+  "short_name": "Trcose",
+  "start_url": "https://market-co.github.io/Trcose/",
+  "theme_color": "#1769ff",
+  "id": "https://market-co.github.io/Trcose/",
+  "lang": "rw"
+}
