@@ -1,11 +1,10 @@
-
 {
   "id": "/Trcose/",
   "name": "Trcose Market",
   "short_name": "Trcose",
   "description": "Trcose Market — marketplace, jobs, business tools and online exams.",
-  "start_url": "/Trcose/?source=pwa",
-  "scope": "/Trcose/",
+  "start_url": "https://market-co.github.io/Trcose",
+  "scope": "https://market-co.github.io/Trcose",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#ffffff",
@@ -36,5 +35,14 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "dir": "ltr",
+  "share_target": {
+    "method": "GET",
+    "action": "/Trcose/",
+    "params": {
+      "title": "title ",
+      "url": "url"
+    }
+  }
 }
