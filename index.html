@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#1769ff">
-<link rel="manifest" href="/Trcose/manifest.json">
 <meta name="google-site-verification" content="1INuEOCUMyd_z8wVb7xFbtmvDiZ5Hg9AheqauJsDdH4" />
     <title>Trcose Market</title>
 <meta name="application-name" content="Trcose">
@@ -92,7 +91,8 @@ header{background:#fff;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px #
 
 
 .profileHero{border:1px solid #e4ebf8;background:linear-gradient(180deg,#fff,#f8faff)}.profileVideoStats{margin-top:16px;padding:14px;border:1px solid #e1e9f8;border-radius:16px;background:#fbfcff}.profileVideoStats h3{margin-top:0;color:#1769ff}.profileVideoStats .stat{background:#eef4ff;border:1px solid #e1eaff}.videoFeed{margin-top:22px}.videoComposer{background:#fff;border:1px solid #dfe5ef;border-radius:16px;padding:15px;margin:12px 0}.videoPost{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 3px 15px #0001;margin:12px 0}.videoPost video{width:100%;max-height:520px;background:#111;display:block}.videoPost .body{padding:14px}.phoneMasked{font-size:12px;color:#707887}.adminRequest{border:1px solid #dfe5ef;border-radius:12px;padding:12px;margin:10px 0}
-.googleLoginBtn{min-height:48px;border-radius:10px;font-size:15px;font-weight:600;transition:box-shadow .15s ease}.googleLoginBtn:active{box-shadow:0 1px 2px #0002}.googleLoginBtn svg{flex:0 0 22px}.loginBox input{width:100%;margin:5px 0 10px;padding:12px;border-radius:9px;border:1px solid #d7dce5}
+.notificationBell{position:relative}.notificationBadge{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;padding:0 5px;border-radius:20px;background:#e53935;color:#fff;font-size:11px;line-height:19px;font-weight:700;text-align:center;border:2px solid #fff}.googleLoginBtn{min-height:48px;border-radius:10px;font-size:15px;font-weight:600;transition:box-shadow .15s ease}.googleLoginBtn:active{box-shadow:0 1px 2px #0002}.googleLoginBtn svg{flex:0 0 22px}.loginBox input{width:100%;margin:5px 0 10px;padding:12px;border-radius:9px;border:1px solid #d7dce5}
+.publicFeed{margin-top:18px}.feedHeading{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.feedHeading h2,.feedHeading h3{margin:0}.feedSortLabel{background:#fff0d8;color:#9a5700;border-radius:20px;padding:7px 11px;font-size:12px;font-weight:800}.feedList{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:13px;margin-top:12px}.feedCard{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 3px 15px #0001;border:1px solid #e8edf5}.feedCard .feedMedia{width:100%;height:220px;display:block;object-fit:cover;background:#111}.feedCard .feedBody{padding:13px}.feedCard h3{margin:8px 0}.feedMeta{font-size:12px;color:#707887;margin:8px 0}.floatingVideoAdd{position:fixed;right:18px;bottom:22px;z-index:180;width:58px;height:58px;padding:0;border-radius:50%;font-size:36px;line-height:1;box-shadow:0 5px 18px #0003;border:3px solid #fff}.videoComposerFloating{position:fixed;right:14px;bottom:92px;z-index:190;width:min(440px,calc(100vw - 28px));max-height:75vh;overflow:auto;box-shadow:0 8px 35px #0003}.feedEmpty{background:#fff;padding:18px;border-radius:14px;color:#707887}
 </style>
 <style>
 /* Google Translate stays available as an invisible engine; no toolbar/banner on the page. */
@@ -110,7 +110,7 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
   <div class="top">
    <div class="logo notranslate" translate="no" aria-label="Trcose Market"><span class="notranslate" translate="no">Trcose</span> <span data-i18n="market_word">Market</span> 🛍️</div>
    <div class="topActions">
-    <button class="secondary" onclick="openNotifications()" aria-label="Notifications">🔔</button>
+    <button class="secondary notificationBell" onclick="openNotifications()" aria-label="Notifications">🔔<span id="notificationBadge" class="notificationBadge hidden">0</span></button>
     <button class="topAvatarBtn" onclick="toggleMenu()" aria-label="Open profile menu"><img id="topProfileAvatar" src="https://via.placeholder.com/160x160?text=T" alt="Profile picture"></button>
    </div>
   </div>
@@ -148,7 +148,7 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
   <p class="compatNotice">Trcose yateguwe kuri mobile. Images zikoresha lazy-load kandi features zishobora kubura kuri browser ishaje zigira fallback.</p>
  </div>
  <div class="panel">
-<input id="searchBox" data-i18n-placeholder="search" placeholder="🔎 Shakisha product, category cyangwa aho iherereye..." oninput="renderProducts()">
+<input id="searchBox" data-i18n-placeholder="search" placeholder="🔎 Shakisha product, category cyangwa aho iherereye..." oninput="loadMixedPublicFeed()">
      <div class="chips" style="margin-top:8px">
    <button class="chip" onclick="filterCategory('')">Byose</button>
    <button class="chip" onclick="filterCategory('Telefone')">Telefone</button>
@@ -159,28 +159,23 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
   </div>
  </div>
  <div id="publicAds"></div>
- <h2 data-i18n="products">🛍️ Ibicuruzwa</h2>
- <div id="products" class="grid"></div>
-
- <section class="videoFeed" aria-labelledby="freeVideoTitle">
-  <h2 id="freeVideoTitle">🎬 Video Posts</h2>
-  <p class="muted">Reba video za Trcose Market, ukurikire abashyiraho content kandi ubisangize abandi.</p>
-  <button id="videoToolsToggle" type="button" onclick="toggleVideoTools()">✨ Get More Views / Follow / Get Monetized</button>
-  <div id="videoToolsPanel" class="videoComposer hidden">
-   <h3>📤 Shyiraho Video</h3>
-   <input id="videoPostName" maxlength="100" placeholder="Umutwe wa video">
-   <textarea id="videoPostDescription" maxlength="1500" placeholder="Ibisobanuro bigufi (si ngombwa)"></textarea>
-   <label for="videoPostFile">Hitamo video</label><input id="videoPostFile" type="file" accept="video/*">
-   <label for="videoThumbnailFile">Thumbnail (si ngombwa)</label><input id="videoThumbnailFile" type="file" accept="image/png,image/jpeg,image/webp,image/*">
-   <p class="muted">Nudahitemo thumbnail, Trcose izagerageza gufata ifoto iri hagati muri video.</p>
-   <button onclick="publishFreeVideoPost()">📤 Publish Video</button>
-   <button class="secondary" onclick="showPage('profile')">👤 Profile & Followers</button>
-   <button class="secondary" onclick="showPage('monetization')">💰 Get Monetized</button>
-   <button class="secondary" onclick="toggleVideoTools(false)">Funga ibikoresho</button>
-   <p id="videoPostMessage" class="muted" role="status"></p>
-  </div>
-  <div id="videoPosts"><p class="muted">Turimo gushaka video posts...</p></div>
+ <section class="publicFeed" aria-labelledby="publicFeedTitle">
+  <div class="feedHeading"><div><h2 id="publicFeedTitle">🌐 Public Feed</h2><p class="muted">Products na Videos bivanze. Ibyarebwe cyane bishobora kugaragara hejuru.</p></div><span class="feedSortLabel">🔥 Trending</span></div>
+  <div id="publicFeed"><p class="muted">Turimo gutegura Public Feed...</p></div>
  </section>
+ <button id="videoToolsToggle" class="floatingVideoAdd" type="button" onclick="toggleVideoTools()" aria-label="Shyiraho video" title="Shyiraho video">＋</button>
+ <div id="videoToolsPanel" class="videoComposer videoComposerFloating hidden">
+  <div class="feedHeading"><h3>📤 Shyiraho Video</h3><button class="secondary" type="button" onclick="toggleVideoTools(false)">✕</button></div>
+  <input id="videoPostName" maxlength="100" placeholder="Umutwe wa video">
+  <textarea id="videoPostDescription" maxlength="1500" placeholder="Ibisobanuro bigufi (si ngombwa)"></textarea>
+  <label for="videoPostFile">Hitamo video</label><input id="videoPostFile" type="file" accept="video/*">
+  <label for="videoThumbnailFile">Thumbnail (si ngombwa)</label><input id="videoThumbnailFile" type="file" accept="image/png,image/jpeg,image/webp,image/*">
+  <p class="muted">Nudahitemo thumbnail, Trcose izagerageza gufata ifoto iri hagati muri video.</p>
+  <button onclick="publishFreeVideoPost()">📤 Publish Video</button>
+  <button class="secondary" onclick="showPage('profile')">👤 Profile & Followers</button>
+  <button class="secondary" onclick="showPage('monetization')">💰 Get Monetized</button>
+  <p id="videoPostMessage" class="muted" role="status"></p>
+ </div>
 </section>
 
 <section id="sellPage" class="page hidden">
@@ -273,7 +268,8 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
  <div class="panel">
   <h3 data-i18n="job_exam_title">📝 Ikizamini cyo ku murongo</h3>
   <p class="notice" data-i18n="job_exam_notice">Ikizamini gifunguka gusa iyo ubwishyu bwemejwe kandi hashize amasaha 24.</p>
-  <button onclick="startPayment('exam',8)">💳 <span data-i18n="job_exam_pay">Ishyura $8 → Tegura ikizamini cy'akazi</span></button>
+  <p>Hitamo amafaranga y'ikizamini. Ubwo wishyuye, Admin agenzura ubwishyu mbere yo gufungura ikizamini.</p>
+  <div class="smallgrid"><button onclick="startPayment('exam',3000)">💳 3,000 RWF</button><button onclick="startPayment('exam',5000)">💳 5,000 RWF</button><button onclick="startPayment('exam',8000)">💳 8,000 RWF</button></div>
   <div id="examWaiting" class="hidden notice"></div>
   <button id="examButton" class="hidden" onclick="openExam()">🔐 <span data-i18n="job_exam_open">Fungura ikizamini</span></button>
  </div>
@@ -298,7 +294,8 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
    <h3>🛒 Product ya mbere / verification</h3><p>Kwishyura $1 ku product ya mbere kugira ngo isuzumwe. Account iba verified gusa Admin cyangwa payment gateway imaze kwemeza payment.</p>
    <button onclick="startPayment('first_product_verification',1)">💳 Pay $1 – Verify first product</button>
    <h3>🎓 Exam Job</h3><p>Nyuma yo kurangiza ibibazo by’imyitwarire y’umukozi, ushobora gusaba gufungurirwa ikizamini cya job. Admin ni we ushyiraho ikizamini.</p>
-   <button onclick="startPayment('exam_job',8)">💳 Pay $8 – Exam Job</button>
+   <p>Hitamo igiciro cy'ikizamini cya Job. Admin ni we wemeza ubwishyu mbere yo kuguha uburenganzira.</p>
+   <div class="smallgrid"><button onclick="startPayment('exam_job',3000)">💳 3,000 RWF</button><button onclick="startPayment('exam_job',5000)">💳 5,000 RWF</button><button onclick="startPayment('exam_job',8000)">💳 8,000 RWF</button></div>
    <div id="examJobStatus" class="notice" style="margin-top:10px">Wait your work — utegereze ko payment na exam access byemezwa.</div>
   </div>
  </section>
@@ -433,6 +430,7 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
    
      <button class="secondary" onclick="showAdminTab('revenue')">💰 Revenue</button>
   <button class="secondary" onclick="showAdminTab('managers')">👥 Manager approvals</button>
+  <button class="secondary" onclick="showAdminTab('broadcast')">📢 Public message</button>
   <button class="secondary" onclick="showAdminTab('users')">🔐 Users & Activity</button>
   <button class="secondary" onclick="showAdminTab('content')">🧹 Posts & Jobs</button>
   <button class="secondary" onclick="openAdminAd()">📢 New Ad</button>
@@ -461,6 +459,7 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
   <button class="secondary" onclick="loadAdminManagerRequests()">🔄 Refresh requests</button>
   <div id="adminManagerList"><p class="muted">Kanda Refresh requests.</p></div>
  </div>
+ <div id="adminBroadcastSection" class="panel hidden"><h3>📢 Ohereza ubutumwa kuri accounts zose</h3><p class="muted">Ubutumwa buzagaragara kuri buri muntu winjiye muri Trcose, muri Notifications no muri Inbox, bwanditse ko buvuye kuri Trcose message.</p><input id="broadcastTitle" maxlength="120" placeholder="Umutwe w'ubutumwa (urugero: Amakuru mashya)"><textarea id="broadcastBody" rows="5" maxlength="5000" placeholder="Andika ubutumwa ushaka ko buri account ibona..."></textarea><button onclick="sendTrcoseBroadcast()">📤 Ohereza kuri accounts zose</button><p id="broadcastStatus" class="muted"></p><hr><h4>Ubutumwa bwohererejwe abantu</h4><button class="secondary" onclick="loadAdminBroadcastHistory()">🔄 Refresh</button><div id="broadcastHistory"></div></div>
  <div id="adminUsersSection" class="panel hidden"><h3>🔐 Users & Activity</h3><p class="muted">Iyi tab igaragara ku ma-email yemewe gusa. “Recent activity” ni ibikorwa byanditswe muri product_events; si igipimo nyacyo cya online presence.</p><div class="stats"><div class="stat">🟢 Online now<br><b id="adminOnlineUsers">—</b></div><div class="stat">👥 Users<br><b id="adminUsersCount">—</b></div><div class="stat">🛍️ Products<br><b id="adminProductsCount">—</b></div><div class="stat">⚡ Recent events<br><b id="adminRecentEvents">—</b></div><div class="stat">💼 Jobs<br><b id="adminJobsCount">—</b></div></div><button class="secondary" onclick="loadAdminUsers()">🔄 Refresh users / activity</button><div id="adminUsersList"></div></div>
  <div id="adminContentSection" class="panel hidden"><h3>🧹 Manage Posts & Jobs</h3><p class="muted">Guhisha cyangwa gusiba bikenera Supabase RLS policies zemerera admin; niba policy itabihaye uburenganzira, igikorwa kiranga kandi amakuru akagumana umutekano.</p><button class="secondary" onclick="loadAdminContent()">🔄 Refresh content</button><div id="adminContentList"></div><hr><h4>💬 Comments moderation</h4><button class="secondary" onclick="loadAdminComments()">Refresh comments</button><div id="adminCommentsList"></div></div>
     
@@ -543,14 +542,19 @@ const demoJobs=[
 function $(id){return document.getElementById(id)}
 function money(n){return Number(n||0).toLocaleString("en-US")+" RWF"}
 function escapeHTML(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-function filterCategory(c){$("searchBox").value=c;renderProducts()}
+function filterCategory(c){$("searchBox").value=c;renderProducts();loadMixedPublicFeed()}
 function closeModal(id){$(id)?.classList.remove("show")}
 function openAuth(){$("authModal").classList.add("show")}
 function closeAuth(){$("authModal").classList.remove("show")}
 function toggleMenu(){$("profileMenu").classList.toggle("show")}
 function toggleEarnMenu(force){const el=$("earnMenu");if(!el)return;if(force===false){el.classList.remove("show");return}el.classList.toggle("show")}
 function openStandaloneJobs(){window.open("job.html","_blank","noopener")}
-function openNotifications(){$("notificationModal").classList.add("show")}
+async function openNotifications(){if(!user){openAuth();return}$("notificationModal").classList.add("show");await loadTrcosePublicMessages(true)}
+function broadcastSeenKey(){return user?"trcose_broadcast_seen_"+user.id:""}
+function getSeenBroadcastIds(){try{return JSON.parse(localStorage.getItem(broadcastSeenKey())||"[]")}catch(e){return []}}
+function markBroadcastsSeen(rows){if(!user)return;const ids=(rows||[]).map(x=>x.id);try{localStorage.setItem(broadcastSeenKey(),JSON.stringify([...new Set([...getSeenBroadcastIds(),...ids])]))}catch(e){}updateBroadcastBadge(rows)}
+function updateBroadcastBadge(rows){if(!user)return;const seen=getSeenBroadcastIds(),unread=(rows||[]).filter(x=>!seen.includes(x.id)).length,badge=$("notificationBadge");if(!badge)return;badge.textContent=unread>99?"99+":String(unread);badge.classList.toggle("hidden",unread===0)}
+async function loadTrcosePublicMessages(markSeen=false){if(!user)return;const {data,error}=await supabaseClient.from("trcose_public_messages").select("id,title,body,created_at").order("created_at",{ascending:false}).limit(50);const list=data||[];if(error){if($("notificationList"))$("notificationList").innerHTML=`<p class="error">Ubutumwa ntibushoboye kuza: ${escapeHTML(error.message)}. Reba SQL ya Trcose messages.</p>`;return}updateBroadcastBadge(list);const html=list.length?list.map(m=>`<article class="adminRequest"><b>📢 Trcose message</b><h3>${escapeHTML(m.title||"Amakuru ya Trcose")}</h3><p style="white-space:pre-wrap">${escapeHTML(m.body||"")}</p><small class="muted">${escapeHTML(new Date(m.created_at).toLocaleString())}</small></article>`).join(""):"<p class='muted'>Nta butumwa bushya bwa Trcose message.</p>";if($("notificationList"))$("notificationList").innerHTML=html;if(markSeen)markBroadcastsSeen(list);return list}
 function protectedPage(page){if(!user){openAuth();return}showPage(page)}
 function showPage(page){
  if(page==="admin"&&(!user||!ZUNIVO_ADMIN_EMAILS.includes(String(user.email||"").toLowerCase().trim()))){alert("Iyi dashboard igenewe Admin wa Trcose gusa.");return}
@@ -570,11 +574,11 @@ function showPage(page){
 function setLoginLoading(on){$("authMessage").textContent=on?"Turimo gutunganya...":$("authMessage").textContent}
 async function isTrcoseAdmin(){return !!user&&ZUNIVO_ADMIN_EMAILS.includes(String(user.email||"").toLowerCase().trim())}
 async function updateAdminUI(){$("adminNavBtn").style.display=await isTrcoseAdmin()?"block":"none"}
-async function refreshUser(){const {data}=await supabaseClient.auth.getUser();user=data.user||null;await updateAdminUI();if(user){await loadProfile();await loadWallet()}}
+async function refreshUser(){const {data}=await supabaseClient.auth.getUser();user=data.user||null;await updateAdminUI();if(user){await loadProfile();await loadWallet();await loadTrcosePublicMessages(false)}}
 async function init(){
  const {data}=await supabaseClient.auth.getSession();user=data.session?.user||null;await updateAdminUI();startTrcosePresence();
- supabaseClient.auth.onAuthStateChange((event,session)=>{const nextUser=session?.user||null;const presenceIdentityChanged=(user?.id||null)!==(nextUser?.id||null);user=nextUser;if(presenceIdentityChanged)startTrcosePresence();if(event==="PASSWORD_RECOVERY"){$("passwordRecoveryModal")?.classList.add("show");closeAuth()}setTimeout(async()=>{await updateAdminUI();if(user){await loadProfile();await loadFollowStats();await loadProfileFollowers();await loadMyPosts()}renderProducts();loadFreeVideoPosts()},0)});
- await loadProducts();renderProducts();if(user){await loadProfile();await refreshJobAccess();await refreshExamAccess()}
+ supabaseClient.auth.onAuthStateChange((event,session)=>{const nextUser=session?.user||null;const presenceIdentityChanged=(user?.id||null)!==(nextUser?.id||null);user=nextUser;if(presenceIdentityChanged)startTrcosePresence();if(event==="PASSWORD_RECOVERY"){$("passwordRecoveryModal")?.classList.add("show");closeAuth()}setTimeout(async()=>{await updateAdminUI();if(user){await loadProfile();await loadFollowStats();await loadProfileFollowers();await loadMyPosts();await loadTrcosePublicMessages(false)}renderProducts();loadMixedPublicFeed();loadFreeVideoPosts()},0)});
+ await loadProducts();renderProducts();await loadMixedPublicFeed();if(user){await loadProfile();await refreshJobAccess();await refreshExamAccess()}
  // Open a product when someone visits a shared Trcose link such as ?product=UUID.
  try{const sharedProductId=new URLSearchParams(window.location.search).get("product");if(sharedProductId){const sharedProduct=products.find(p=>String(p.id)===String(sharedProductId))||demoProducts.find(p=>String(p.id)===String(sharedProductId));if(sharedProduct){await openProduct(sharedProductId)}else{const details=$("productDetails");if(details)details.innerHTML="<div class='notice'>Iki gicuruzwa ntikiboneka kuri public cyangwa link si yo.</div>"}}}catch(e){console.warn("Shared product link error",e)}
  loadPublicAds();
@@ -585,7 +589,7 @@ init();
 
 async function googleLogin(){
  setLoginLoading(true);
- const {error}=await supabaseClient.auth.signInWithOAuth({provider:"google",options:{redirectTo:window.location.origin+window.location.pathname}});
+ const {error}=await supabaseClient.auth.signInWithOAuth({provider:"google",options:{redirectTo:window.location.origin+window.location.pathname,queryParams:{prompt:"select_account"}}});
  if(error){$("authMessage").textContent=error.message;setLoginLoading(false)}
 }
 async function sendPasswordReset(){
@@ -670,6 +674,35 @@ function renderProducts(){
  </div></article>`).join(""):`<div class="panel">Nta products zirabonetse.</div>`;
  setTimeout(hydrateProductSellers,0)
 }
+// One shared public feed: active products and video posts are rendered together.
+async function loadMixedPublicFeed(){
+ const box=$("publicFeed");if(!box)return;
+ box.innerHTML='<p class="muted">Turimo kuzana posts...</p>';
+ try{
+  const {data,error}=await supabaseClient.from("products").select("*").eq("status","active").order("created_at",{ascending:false}).limit(80);
+  if(error)throw error;
+  const rows=(data||[]).filter(p=>p&&p.id);
+  const ids=rows.map(p=>p.id);
+  const viewCounts={};
+  if(ids.length){
+   const countResults=await Promise.all(rows.map(async p=>{
+    const r=await supabaseClient.from("product_events").select("id",{count:"exact",head:true}).eq("product_id",p.id).eq("event_type","view");
+    return [p.id,r.error?0:Number(r.count||0)];
+   }));
+   countResults.forEach(([id,count])=>viewCounts[id]=count);
+  }
+  const q=($("searchBox")?.value||"").toLowerCase().trim();
+  const visible=rows.filter(p=>!q||[p.name,p.category,p.city,p.description].join(" ").toLowerCase().includes(q));
+  visible.sort((a,b)=>(viewCounts[b.id]||0)-(viewCounts[a.id]||0)||new Date(b.created_at||0)-new Date(a.created_at||0));
+  if(!visible.length){box.innerHTML='<div class="feedEmpty">Nta posts za Public zihari. Shyiraho product cyangwa video ya mbere!</div>';return;}
+  box.innerHTML='<div class="feedList">'+visible.map(p=>{
+   const isVideo=String(p.category||"").toLowerCase()==="video"||String(p.media_type||"").toLowerCase()==="video";
+   const id=String(p.id).replace(/'/g,"\\'");
+   const media=isVideo?`<video class="feedMedia" controls playsinline preload="metadata" poster="${escapeHTML(p.thumbnail_url||"")}" src="${escapeHTML(p.media_url||p.image_url||"")}" onplay="recordVideoPostView('${id}')"></video>`:`<img class="feedMedia" loading="lazy" src="${escapeHTML(p.image_url||p.media_url||"https://via.placeholder.com/600x400?text=Trcose")}" alt="${escapeHTML(p.name||"Trcose product")}">`;
+   return `<article class="feedCard">${media}<div class="feedBody"><span class="badge">${isVideo?"🎬 Video":"🛍️ "+escapeHTML(p.category||"Product")}</span><h3 class="notranslate" translate="no">${escapeHTML(p.name||"Trcose post")}</h3>${isVideo?`<p>${escapeHTML(p.description||"")}</p>`:`<div class="price">${money(p.price)}</div><p>${escapeHTML(p.description||"")}</p><p class="muted">📍 ${escapeHTML(p.city||"")}</p>`}<div class="feedMeta">👀 ${viewCounts[p.id]||0} views · ${p.created_at?new Date(p.created_at).toLocaleDateString():""}</div><div class="actionRow"><button onclick="openProduct('${id}')">👀 View</button><button class="secondary" onclick="likeProduct('${id}')">❤️ Like</button><button class="secondary" onclick="${isVideo?`shareVideoPost('${id}')`:`shareProduct('${id}')`}">↗️ Share</button>${!isVideo?`<button class="secondary" onclick="buyProduct('${id}')">🛒 Buy</button>`:""}</div></div></article>`;
+  }).join("")+'</div>';
+ }catch(e){box.innerHTML=`<div class="notice">Public Feed ntishoboye kwikorera: ${escapeHTML(e?.message||"Reba internet na Supabase.")}</div>`;}
+}
 async function openProduct(id){
  const p=products.find(x=>x.id===id)||demoProducts.find(x=>x.id===id);if(!p)return;selectedProduct=p;
  $("productDetails").innerHTML=`
@@ -699,8 +732,9 @@ async function shareItem(title,url){
  const copied=await copyTextFallback(String(url));
  alert(copied?"Link yakopiwe. Ushobora kuyishyira muri WhatsApp cyangwa ahandi.":"Ntibyashobotse gukopa link. Yifungure muri address bar uyikopore.");
 }
-function shareProduct(id){const p=products.find(x=>String(x.id)===String(id))||demoProducts.find(x=>String(x.id)===String(id));if(p)shareItem((p.name||"Trcose Product")+" — Trcose Market",location.href.split("?")[0]+"?product="+encodeURIComponent(id))}
-async function shareVideoPost(id){try{await supabaseClient.from("product_events").insert({product_id:id,event_type:"share",user_id:user?.id||null})}catch(e){} const p=products.find(x=>x.id===id);if(p)shareItem(p.name||"Trcose Video",location.href.split("?")[0]+"?product="+encodeURIComponent(id));await loadFreeVideoPosts();if(user)await loadMyVideoStats()}
+function trcoseShareUrl(type,id){const u=new URL("https://trcose.netlify.app/.netlify/functions/share");u.searchParams.set("type",String(type));u.searchParams.set("id",String(id));return u.toString()}
+function shareProduct(id){const p=products.find(x=>String(x.id)===String(id))||demoProducts.find(x=>String(x.id)===String(id));if(!p){alert("Igicuruzwa nticyabonetse.");return}if(String(id).startsWith("demo")){alert("Iyi ni demo product; share ikora kuri product iri muri Supabase.");return}shareItem((p.name||"Trcose Product")+" — Trcose Market",trcoseShareUrl("product",id))}
+async function shareVideoPost(id){try{await supabaseClient.from("product_events").insert({product_id:id,event_type:"share",user_id:user?.id||null})}catch(e){} const p=products.find(x=>String(x.id)===String(id));if(p)shareItem(p.name||"Trcose Video",trcoseShareUrl("product",id));await loadFreeVideoPosts();if(user)await loadMyVideoStats()}
 function shareReferral(){const c=$("myReferralCode")?.textContent?.trim()||"";shareItem("Trcose Referral "+c,location.href.split("?")[0]+"?ref="+encodeURIComponent(c))}
 
 async function loadProfile(){
@@ -726,7 +760,7 @@ async function publishProduct(){
 }
 
 function startPayment(purpose,amount,productId=null){
- if(!user){openAuth();return}paymentPurpose={type:purpose,productId,amount:Number(amount)};const usdPurposes=["listing","first_product_verification","exam","exam_job"];
+ if(!user){openAuth();return}paymentPurpose={type:purpose,productId,amount:Number(amount)};const usdPurposes=["listing","first_product_verification"];
  $("paymentDescription").innerHTML=`Payment: <b>${escapeHTML(purpose)}</b><br>Amount: <b>${usdPurposes.includes(purpose)?"$"+Number(amount).toFixed(2)+" USD":money(amount)}</b>`;$("paymentMessage").textContent="";$("paymentModal").classList.add("show")
 }
 function closePayment(){$("paymentModal").classList.remove("show")}
@@ -904,7 +938,11 @@ async function messageSeller(sellerId){
 async function loadConversations(){
  if(!user)return;const box=$("conversationList");if(!box)return;const {data,error}=await supabaseClient.from("messages").select("sender_id,receiver_id,body,created_at").or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`).order("created_at",{ascending:false});
  if(error){box.innerHTML=`<div class="error">${escapeHTML(error.message)}</div>`;return}const ids=[];for(const m of data||[]){const id=m.sender_id===user.id?m.receiver_id:m.sender_id;if(id&&!ids.includes(id))ids.push(id)}
- box.innerHTML=ids.length?ids.map(id=>`<button class="secondary" style="width:100%;text-align:left" onclick="openConversation('${escapeHTML(id)}')">💬 ${escapeHTML(id)}</button>`).join(""):"<p class='muted'>Nta conversations ziraboneka.</p>"
+ const directHtml=ids.length?ids.map(id=>`<button class="secondary" style="width:100%;text-align:left" onclick="openConversation('${escapeHTML(id)}')">💬 ${escapeHTML(id)}</button>`).join(""):"<p class='muted'>Nta direct conversations ziraboneka.</p>";
+ const {data:broadcasts,error:bError}=await supabaseClient.from("trcose_public_messages").select("id,title,body,created_at").order("created_at",{ascending:false}).limit(50);
+ const publicHtml=bError?`<p class="error">Trcose messages: ${escapeHTML(bError.message)}</p>`:(broadcasts||[]).length?(broadcasts||[]).map(m=>`<article class="adminRequest"><b>📢 Trcose message</b><h3>${escapeHTML(m.title||"Amakuru ya Trcose")}</h3><p style="white-space:pre-wrap">${escapeHTML(m.body||"")}</p><small class="muted">${escapeHTML(new Date(m.created_at).toLocaleString())}</small></article>`).join(""):`<p class="muted">Nta butumwa rusange bwa Trcose.</p>`;
+ box.innerHTML=`<h3>📢 Trcose messages</h3>${publicHtml}<hr><h3>💬 Direct messages</h3>${directHtml}`;
+ if(!bError)updateBroadcastBadge(broadcasts||[]);
 }
 async function openConversation(otherId){
  if(!user)return;activeChatUserId=otherId;$("chatPanel").classList.remove("hidden");$("chatTitle").textContent="💬 Inbox";
@@ -1000,7 +1038,7 @@ async function publishFreeVideoPost(){
   if(error)throw error;
   $("videoPostName").value="";$("videoPostDescription").value="";$("videoPostFile").value="";if($("videoThumbnailFile"))$("videoThumbnailFile").value="";
   box.textContent=thumbnailUrl?"Video yashyizwe public kandi thumbnail irahari.":"Video yashyizwe public. Browser cyangwa Storage ntiyashoboye gukora thumbnail; video iracyakora kandi ushobora kongera kugerageza thumbnail.";
-  await loadProducts();renderProducts();await loadFreeVideoPosts();await loadMyPosts();await loadMyVideoStats();
+  await loadProducts();renderProducts();await loadMixedPublicFeed();await loadFreeVideoPosts();await loadMyPosts();await loadMyVideoStats();
   if(data?.id){try{history.replaceState(null,"",location.pathname+"?product="+encodeURIComponent(data.id))}catch(e){}}
  }catch(e){box.textContent="Ntibyashobotse gushyira video public: "+(e?.message||"Reba product-videos bucket, products columns na Supabase RLS policies.");}
  finally{if(publishBtn){publishBtn.disabled=false;publishBtn.textContent="📤 Publish Video"}}
@@ -1142,6 +1180,17 @@ function openWalletWithdraw(){if(!user){openAuth();return}showPage("referral");$
 function startVisaGateway(){if(!user){openAuth();return}$("paymentMessage").innerHTML='<span class="notice">Visa Card: gateway ntirashyirwamo. Huza payment provider na Supabase Edge Function; ntukandike card number cyangwa CVV muri website.</span>'}
 function startBinanceGateway(){if(!user){openAuth();return}$("paymentMessage").innerHTML='<span class="notice">Binance Pay: iyi ni placeholder. Payment nyayo isaba Binance Pay merchant account, server-side order creation na webhook verification. Ntukohereze amafaranga kuri address itagenzuwe.</span>'}
 
+async function sendTrcoseBroadcast(){
+ if(!await isTrcoseAdmin())return;const title=$("broadcastTitle").value.trim(),body=$("broadcastBody").value.trim(),status=$("broadcastStatus");
+ if(!body){status.textContent="Banza wandike ubutumwa ushaka kohereza.";return}
+ if(!confirm("Uremeza kohereza ubu butumwa kuri accounts zose za Trcose?"))return;
+ status.textContent="Turimo kohereza...";
+ const {error}=await supabaseClient.from("trcose_public_messages").insert({title:title||"Amakuru ya Trcose",body,sender_label:"Trcose message",created_by:user.id});
+ if(error){status.textContent="Ntibyoherejwe: "+error.message+". Reba SQL/RLS ya trcose_public_messages.";return}
+ $("broadcastTitle").value="";$("broadcastBody").value="";status.textContent="Ubutumwa bwoherejwe. Buzagaragara muri Notifications na Inbox kuri accounts zose.";await loadAdminBroadcastHistory();
+}
+async function loadAdminBroadcastHistory(){if(!await isTrcoseAdmin())return;const box=$("broadcastHistory");if(!box)return;box.textContent="Loading...";const {data,error}=await supabaseClient.from("trcose_public_messages").select("id,title,body,created_at").order("created_at",{ascending:false}).limit(30);if(error){box.innerHTML=`<p class="error">${escapeHTML(error.message)}</p>`;return}box.innerHTML=(data||[]).map(m=>`<article class="adminRequest"><b>${escapeHTML(m.title||"Amakuru ya Trcose")}</b><p style="white-space:pre-wrap">${escapeHTML(m.body||"")}</p><small>${escapeHTML(new Date(m.created_at).toLocaleString())}</small></article>`).join("")||"Nta butumwa bwoherejwe."}
+
 async function loadAdminUsers(){
  if(!await isTrcoseAdmin())return;const box=$("adminUsersList");if(!box)return;box.innerHTML="⏳ Loading users...";
  const [users,productsResult,events,jobs]=await Promise.all([
@@ -1190,6 +1239,7 @@ async function showAdminDashboard(){if(!await isTrcoseAdmin()){alert("Nturi Admi
   $("adminExamSection").classList.toggle("hidden", t !== "exams" && t !== "examManager");
   $("adminRevenueSection").classList.toggle("hidden", t !== "revenue");
   $("adminManagerSection").classList.toggle("hidden", t !== "managers");
+  $("adminBroadcastSection")?.classList.toggle("hidden",t!=="broadcast");
   $("adminUsersSection")?.classList.toggle("hidden",t!=="users");
   $("adminContentSection")?.classList.toggle("hidden",t!=="content");
   $("adminExamManagerSection").classList.toggle("hidden", t !== "examManager");
@@ -1199,6 +1249,7 @@ async function showAdminDashboard(){if(!await isTrcoseAdmin()){alert("Nturi Admi
   if(t === "revenue") loadAdminRevenue();
   if(t === "managers") loadAdminManagerRequests();
   if(t === "users") loadAdminUsers();
+  if(t === "broadcast") loadAdminBroadcastHistory();
   if(t === "content") {loadAdminContent();loadAdminComments()}
   if(t === "examManager") {
     resetAdminExamBuilder();
