@@ -147,8 +147,20 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
  <div class="head">
   <div class="top">
    <button class="headerMenuBtn" type="button" onclick="toggleTrcoseNav()" aria-label="Fungura menu">☰</button>
-   <div class="brandAIIcon" role="img" aria-label="Trcose AI logo"><span class="brandAIOrbit"></span><span class="brandAICart">🛒</span><b>AI</b></div><div class="brandBlock"><div class="logo notranslate" translate="no" aria-label="Trcose AI"><span class="notranslate" translate="no">TRCOSE</span> <span class="aiWord">AI</span></div></div>
-   <div class="topActions">
+
+   <div class="brandBlock" style="display:flex;align-items:center;gap:8px">
+  <img
+    src="/Trcose/icons/trcose-ai-logo.svg"
+    alt="TRCOSE AI"
+    width="64"
+    height="64"
+    style="width:64px;height:64px;object-fit:contain;flex-shrink:0"
+  >
+  <div class="logo notranslate" translate="no" aria-label="Trcose AI">
+    <span>TRCOSE</span> <span class="aiWord">AI</span>
+  </div>
+</div>   
+      <div class="topActions">
     <button class="secondary notificationBell" onclick="openNotifications()" aria-label="Notifications">🔔<span id="notificationBadge" class="notificationBadge hidden">0</span></button>
     <button class="topAvatarBtn" onclick="toggleMenu()" aria-label="Open profile menu"><img id="topProfileAvatar" src="https://via.placeholder.com/160x160?text=T" alt="Profile picture"></button>
    </div>
