@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#1769ff">
+<link rel="manifest" href="/Trcose/manifest.json">
 <meta name="google-site-verification" content="1INuEOCUMyd_z8wVb7xFbtmvDiZ5Hg9AheqauJsDdH4" />
     <title>Trcose Market</title>
 <meta name="application-name" content="Trcose">
@@ -93,6 +94,10 @@ header{background:#fff;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px #
 .profileHero{border:1px solid #e4ebf8;background:linear-gradient(180deg,#fff,#f8faff)}.profileVideoStats{margin-top:16px;padding:14px;border:1px solid #e1e9f8;border-radius:16px;background:#fbfcff}.profileVideoStats h3{margin-top:0;color:#1769ff}.profileVideoStats .stat{background:#eef4ff;border:1px solid #e1eaff}.videoFeed{margin-top:22px}.videoComposer{background:#fff;border:1px solid #dfe5ef;border-radius:16px;padding:15px;margin:12px 0}.videoPost{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 3px 15px #0001;margin:12px 0}.videoPost video{width:100%;max-height:520px;background:#111;display:block}.videoPost .body{padding:14px}.phoneMasked{font-size:12px;color:#707887}.adminRequest{border:1px solid #dfe5ef;border-radius:12px;padding:12px;margin:10px 0}
 .notificationBell{position:relative}.notificationBadge{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;padding:0 5px;border-radius:20px;background:#e53935;color:#fff;font-size:11px;line-height:19px;font-weight:700;text-align:center;border:2px solid #fff}.googleLoginBtn{min-height:48px;border-radius:10px;font-size:15px;font-weight:600;transition:box-shadow .15s ease}.googleLoginBtn:active{box-shadow:0 1px 2px #0002}.googleLoginBtn svg{flex:0 0 22px}.loginBox input{width:100%;margin:5px 0 10px;padding:12px;border-radius:9px;border:1px solid #d7dce5}
 .publicFeed{margin-top:18px}.feedHeading{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.feedHeading h2,.feedHeading h3{margin:0}.feedSortLabel{background:#fff0d8;color:#9a5700;border-radius:20px;padding:7px 11px;font-size:12px;font-weight:800}.feedList{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:13px;margin-top:12px}.feedCard{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 3px 15px #0001;border:1px solid #e8edf5}.feedCard .feedMedia{width:100%;height:220px;display:block;object-fit:cover;background:#111}.feedCard .feedBody{padding:13px}.feedCard h3{margin:8px 0}.feedMeta{font-size:12px;color:#707887;margin:8px 0}.floatingVideoAdd{position:fixed;right:18px;bottom:22px;z-index:180;width:58px;height:58px;padding:0;border-radius:50%;font-size:36px;line-height:1;box-shadow:0 5px 18px #0003;border:3px solid #fff}.videoComposerFloating{position:fixed;right:14px;bottom:92px;z-index:190;width:min(440px,calc(100vw - 28px));max-height:75vh;overflow:auto;box-shadow:0 8px 35px #0003}.feedEmpty{background:#fff;padding:18px;border-radius:14px;color:#707887}
+
+.trcoseAI{border:1px solid #b8d1ff;background:linear-gradient(145deg,#f4f8ff,#fff);border-radius:18px;margin:14px 0;padding:15px}
+.aiHead{display:flex;justify-content:space-between;align-items:center}.aiHead h2{margin:6px 0 3px}.aiTag{font-size:11px;font-weight:800;letter-spacing:1.4px;color:#1769ff}.aiOrb{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:#1769ff;color:white;font-size:27px;box-shadow:0 5px 18px #1769ff44}
+.aiQuick{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.aiQuick button{font-size:12px;padding:8px 10px}.aiChat{display:flex;flex-direction:column;gap:8px;max-height:220px;overflow:auto;padding:8px 2px}.aiBubble{background:#eaf1ff;border-radius:14px 14px 14px 3px;padding:10px 12px;max-width:94%;font-size:14px;line-height:1.45}.aiBubble.user{align-self:flex-end;background:#1769ff;color:#fff;border-radius:14px 14px 3px 14px}.aiBubble a{font-weight:700}.aiInputRow{display:flex;gap:7px}.aiInputRow input{flex:1;min-width:0}.aiDisclaimer{font-size:11px;margin:9px 0 0}
 </style>
 <style>
 /* Google Translate stays available as an invisible engine; no toolbar/banner on the page. */
@@ -147,6 +152,13 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
   <button onclick="findNearby()">📍 Ibikwegereye</button>
   <p class="compatNotice">Trcose yateguwe kuri mobile. Images zikoresha lazy-load kandi features zishobora kubura kuri browser ishaje zigira fallback.</p>
  </div>
+ <section id="trcoseAI" class="panel trcoseAI" aria-label="Trcose AI">
+  <div class="aiHead"><div><span class="aiTag">✨ TRCOSE AI</span><h2>Umufasha wa Trcose</h2><p class="muted">Agufasha gushaka products, videos na jobs no kubona ibikwegereye.</p></div><span class="aiOrb">✦</span></div>
+  <div class="aiQuick"><button type="button" class="secondary" onclick="trcoseAIQuick('Nshakira telefone')">📱 Shaka telefone</button><button type="button" class="secondary" onclick="trcoseAIQuick('Nshakira akazi')">💼 Shaka akazi</button><button type="button" class="secondary" onclick="trcoseAINearby()">📍 Ibinkikije</button><button type="button" class="secondary" onclick="trcoseAIQuick('Mpa inama yo kugurisha')">💡 Inama yo kugurisha</button></div>
+  <div id="trcoseAIChat" class="aiChat" aria-live="polite"><div class="aiBubble">Muraho! Ndi umufasha wa Trcose. Mbwira icyo ushaka—product, video, akazi cyangwa ubufasha bwo gukoresha Trcose.</div></div>
+  <form class="aiInputRow" onsubmit="event.preventDefault();trcoseAISend()"><input id="trcoseAIInput" autocomplete="off" placeholder="Andika icyo ushaka..." aria-label="Andika ikibazo"><button type="submit">Ohereza ➤</button></form>
+  <p class="muted aiDisclaimer">Iyi verisiyo ikoresha amakuru ari kuri Trcose n'amategeko y'ubushakashatsi. AI model yo kuri internet izongerwamo nyuma binyuze kuri API itekanye.</p>
+ </section>
  <div class="panel">
 <input id="searchBox" data-i18n-placeholder="search" placeholder="🔎 Shakisha product, category cyangwa aho iherereye..." oninput="loadMixedPublicFeed()">
      <div class="chips" style="margin-top:8px">
@@ -760,7 +772,7 @@ async function publishProduct(){
 }
 
 function startPayment(purpose,amount,productId=null){
- if(!user){openAuth();return}paymentPurpose={type:purpose,productId,amount:Number(amount)};const usdPurposes=["listing","first_product_verification"];
+ if(!user){openAuth();return}paymentPurpose={type:purpose,productId,amount:Number(amount)};const usdPurposes=["listing","first_product_verification","exam","exam_job"];
  $("paymentDescription").innerHTML=`Payment: <b>${escapeHTML(purpose)}</b><br>Amount: <b>${usdPurposes.includes(purpose)?"$"+Number(amount).toFixed(2)+" USD":money(amount)}</b>`;$("paymentMessage").textContent="";$("paymentModal").classList.add("show")
 }
 function closePayment(){$("paymentModal").classList.remove("show")}
@@ -870,6 +882,45 @@ async function loadBusinessExamReview(){
  const {data,error}=await supabaseClient.from("exam_results").select("*").eq("user_id",user.id).order("created_at",{ascending:false}).limit(20);
  box.innerHTML=error?'<div class="error">'+escapeHTML(error.message)+'</div>':(data?.length?data.map(x=>'<div class="listrow">Score: <b>'+escapeHTML(x.score||0)+'/'+escapeHTML(x.total_questions||0)+'</b> · '+escapeHTML(x.passed?'Passed':'Not passed')+'</div>').join(""):"<p class='muted'>Nta exam result ibonetse kuri iyi account.</p>");
 }
+
+function trcoseAIAdd(text,isUser=false){
+ const box=$("trcoseAIChat");if(!box)return;
+ const node=document.createElement("div");node.className="aiBubble"+(isUser?" user":"");node.textContent=text;box.appendChild(node);box.scrollTop=box.scrollHeight;
+}
+function trcoseAIQuick(q){$("trcoseAIInput").value=q;trcoseAISend()}
+function trcoseAISend(){
+ const input=$("trcoseAIInput");const q=String(input?.value||"").trim();if(!q)return;
+ input.value="";trcoseAIAdd(q,true);trcoseAIRespond(q);
+}
+function trcoseAIRespond(q){
+ const text=q.toLowerCase();
+ if(/hafi|near|ikweg|ikik|location|hafi yanjye/.test(text)){trcoseAINearby();return}
+ if(/akazi|job|akazi/.test(text)){trcoseAIAdd("Kanda kuri Job iri muri menu yo hejuru kugira ngo urebe akazi kariho. Nshobora no kugufasha gutegura CV cyangwa ubutumwa bwo gusaba akazi.");return}
+ if(/kugurish|sell|post|shyiraho/.test(text)){trcoseAIAdd("Kugurisha: fungura Sell, andika izina ry'igicuruzwa, igiciro, ibisobanuro n'ifoto, hanyuma ukurikize amabwiriza yo gushyira kuri Public.");return}
+ if(/video/.test(text)){trcoseAIAdd("Kanda akabuto ＋ kari munsi ya Public Feed, uhitemo video, wandike umutwe n'ibisobanuro, hanyuma ukande Publish Video.");return}
+ if(/inama|help|ubufasha|trcose/.test(text)){trcoseAIAdd("Nshobora kugufasha gushaka ibicuruzwa, kumenya uko ushyiraho video, kugurisha no kugera kuri Jobs. Andika izina ry'icyo ushaka cyangwa ukoreshe utubuto two hejuru.");return}
+ const data=(products||[]).filter(p=>!text||[p.name,p.category,p.city,p.description].join(" ").toLowerCase().includes(text));
+ if(data.length){
+  const top=data.slice(0,5);trcoseAIAdd("Nabonye "+data.length+" ibintu bihuye n'ibyo ushaka. Reba ibisubizo muri Public Feed, cyangwa fungura kimwe muri ibi:");
+  top.forEach(p=>{const line=(p.name||"Product")+" — "+(p.price?money(p.price):"Video")+(p.city?" · "+p.city:"");const box=$("trcoseAIChat");const a=document.createElement("button");a.className="secondary";a.style.textAlign="left";a.textContent="🔎 "+line;a.onclick=()=>openProduct(p.id);box.appendChild(a)});return;
+ }
+ if(/telefone|phone|smartphone|imyenda|inzu|imodoka|ibiribwa|product|igicuruzwa/.test(text)){
+  $("searchBox").value=q;loadMixedPublicFeed();trcoseAIAdd("Nashyize icyo ushaka mu bushakashatsi bwa Public Feed. Reba posts zihuye n'ijambo wanditse.");return;
+ }
+ trcoseAIAdd("Ndumva ushaka: "+q+". Gerageza kwandika izina rya product, category, umujyi cyangwa ukoreshe utubuto two hejuru. Ibisubizo bishingira ku makuru ari muri Trcose ubu.");
+}
+function trcoseAINearby(){
+ if(!navigator.geolocation){trcoseAIAdd("Browser yawe ntishyigikira Location. Ushobora gushaka ukoresheje izina ry'umujyi muri search.");return}
+ trcoseAIAdd("Trcose iragusaba uruhushya rwa Location kugira ngo ibone ibikwegereye. Ntabwo izabika coordinates zawe muri profile muri iyi verisiyo.");
+ navigator.geolocation.getCurrentPosition(pos=>{
+  const lat=pos.coords.latitude,lon=pos.coords.longitude;
+  const rows=(products||[]).filter(p=>Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lon)));
+  if(!rows.length){trcoseAIAdd("Location yemerewe. Ariko products ziriho ntizifite coordinates zihagije zo kubara intera. Shakisha ukoresheje umujyi cyangwa ahantu.");return}
+  const distance=(a,b)=>{const r=6371,d1=(b.lat-lat)*Math.PI/180,d2=(b.lon-lon)*Math.PI/180;const x=Math.sin(d1/2)**2+Math.cos(lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(d2/2)**2;return 2*r*Math.asin(Math.sqrt(x))};
+  rows.sort((a,b)=>distance(a,b)-distance(b,a));trcoseAIAdd("Ibintu biri hafi yawe (hashingiwe gusa ku products zifite coordinates): "+rows.slice(0,3).map(x=>x.name+" ("+distance(x,{lat:Number(x.lat),lon:Number(x.lon)}).toFixed(1)+" km)").join(", "));
+ },()=>trcoseAIAdd("Ntabwo wemeye Location cyangwa browser yanze kuyitanga. Ushobora gukomeza gushaka ukoresheje search."),{enableHighAccuracy:false,timeout:10000,maximumAge:300000});
+}
+
 function findNearby(){
  if(!navigator.geolocation){alert("Browser yawe ntabwo yemera location.");return}
  navigator.geolocation.getCurrentPosition(async pos=>{const {latitude,longitude}=pos.coords;if(!user){alert("Injira kugira ngo location ikoreshwe muri Trcose.");return}await supabaseClient.from("profiles").upsert({id:user.id,latitude,longitude});alert("Location yabitswe.")},()=>alert("Emera Location permission muri browser."))
