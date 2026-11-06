@@ -147,20 +147,8 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
  <div class="head">
   <div class="top">
    <button class="headerMenuBtn" type="button" onclick="toggleTrcoseNav()" aria-label="Fungura menu">☰</button>
-
-   <div class="brandBlock" style="display:flex;align-items:center;gap:8px">
-  <img
-    src="/Trcose/icons/trcose-ai-logo.svg"
-    alt="TRCOSE AI"
-    width="64"
-    height="64"
-    style="width:64px;height:64px;object-fit:contain;flex-shrink:0"
-  >
-  <div class="logo notranslate" translate="no" aria-label="Trcose AI">
-    <span>TRCOSE</span> <span class="aiWord">AI</span>
-  </div>
-</div>   
-      <div class="topActions">
+   <div class="brandAIIcon" role="img" aria-label="Trcose AI logo"><span class="brandAIOrbit"></span><span class="brandAICart">🛒</span><b>AI</b></div><div class="brandBlock"><div class="logo notranslate" translate="no" aria-label="Trcose AI"><span class="notranslate" translate="no">TRCOSE</span> <span class="aiWord">AI</span></div></div>
+   <div class="topActions">
     <button class="secondary notificationBell" onclick="openNotifications()" aria-label="Notifications">🔔<span id="notificationBadge" class="notificationBadge hidden">0</span></button>
     <button class="topAvatarBtn" onclick="toggleMenu()" aria-label="Open profile menu"><img id="topProfileAvatar" src="https://via.placeholder.com/160x160?text=T" alt="Profile picture"></button>
    </div>
@@ -525,21 +513,6 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
    <div class="revenueCard">Other<br><b id="revOther">0 RWF</b></div>
   </div>
   <p class="muted">Iyi dashboard ibara payments ziri muri Supabase; commission nyayo, delivery n'izindi revenue streams zisaba tables/RPC zabyo.</p>
- </div>
-     <div id="adminWhatsAppSection" class="panel hidden">
-  <h3>🟢 Trcose AI Message — WhatsApp</h3>
-  <p class="muted">Andika nimero imwe cyangwa nyinshi (umurongo umwe kuri buri nimero, cyangwa uzitandukanye na koma). Ubutumwa buzajya bufunguka kuri buri nimero uko ikurikirana. Kanda Send muri WhatsApp; ugarutse hano ukande “Nohereje — ubutaha”. WhatsApp ntiyemerera urubuga kohereza ubutumwa rwihishe cyangwa rwikora nta kwemeza.</p>
-  <label for="trcoseWhatsAppNumbers"><b>📱 Nimero za WhatsApp</b></label>
-  <textarea id="trcoseWhatsAppNumbers" rows="5" placeholder="0780000000&#10;+250780000000&#10;250780000000"></textarea>
-  <label for="trcoseWhatsAppBody"><b>✉️ Ubutumwa</b></label>
-  <textarea id="trcoseWhatsAppBody" rows="5" maxlength="4000" placeholder="Andika ubutumwa bwa Trcose AI Message..."></textarea>
-  <div class="actionRow">
-   <button type="button" onclick="trcoseAdminStartWhatsApp()">🟢 Tangira kohereza</button>
-   <button type="button" class="secondary" onclick="trcoseAdminNextWhatsApp()">✅ Nohereje — ubutaha</button>
-   <button type="button" class="secondary" onclick="trcoseAdminResetWhatsApp()">↻ Tangira bundi bushya</button>
-  </div>
-  <p id="trcoseWhatsAppStatus" class="muted" aria-live="polite">Nta butumwa buratangira.</p>
-  <div id="trcoseWhatsAppQueue" class="muted"></div>
  </div>
  <div id="adminManagerSection" class="panel hidden">
   <h3>👥 Manager approvals</h3>
@@ -1602,15 +1575,6 @@ ${escapeHTML(String(e.duration_minutes||0))} min · 🎯 ${escapeHTML(String(e.p
 })();
 </script>
 <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", function () {
-    navigator.serviceWorker.register("/Trcose/service-worker.js")
-      .catch(function(error) {
-        console.error("Trcose Service Worker:", error);
-      });
-  });
-}
-</script>
+
 </body>
-</html>    
+</html>
