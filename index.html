@@ -491,6 +491,7 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
      <button class="secondary" onclick="showAdminTab('revenue')">💰 Revenue</button>
   <button class="secondary" onclick="showAdminTab('managers')">👥 Manager approvals</button>
   <button class="secondary" onclick="showAdminTab('broadcast')">📢 Public message</button>
+  <button class="secondary" onclick="showAdminTab('whatsapp')">💬 WhatsApp AI</button>
   <button class="secondary" onclick="showAdminTab('users')">🔐 Users & Activity</button>
   <button class="secondary" onclick="showAdminTab('content')">🧹 Posts & Jobs</button>
   <button class="secondary" onclick="showAdminTab('videoCampaigns')">🎬 Video Campaigns</button>
@@ -521,6 +522,20 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
   <div id="adminManagerList"><p class="muted">Kanda Refresh requests.</p></div>
  </div>
  <div id="adminBroadcastSection" class="panel hidden"><h3>📢 Ohereza ubutumwa kuri accounts zose</h3><p class="muted">Ubutumwa buzagaragara kuri buri muntu winjiye muri Trcose, muri Notifications no muri Inbox, bwanditse ko buvuye kuri Trcose message.</p><input id="broadcastTitle" maxlength="120" placeholder="Umutwe w'ubutumwa (urugero: Amakuru mashya)"><textarea id="broadcastBody" rows="5" maxlength="5000" placeholder="Andika ubutumwa ushaka ko buri account ibona..."></textarea><button onclick="sendTrcoseBroadcast()">📤 Ohereza kuri accounts zose</button><p id="broadcastStatus" class="muted"></p><hr><h4>Ubutumwa bwohererejwe abantu</h4><button class="secondary" onclick="loadAdminBroadcastHistory()">🔄 Refresh</button><div id="broadcastHistory"></div></div>
+ <div id="adminWhatsAppSection" class="panel hidden">
+  <h3>💬 Trcose AI — WhatsApp Broadcast</h3>
+  <p class="muted">Andika nimero nyinshi (imwe kuri buri murongo cyangwa uzitandukanye na koma), wandike ubutumwa, Trcose izabusangiza buri muntu umwe-umwe binyuze kuri WhatsApp Business Cloud API.</p>
+  <label for="trcoseWhatsAppNumbers"><b>Nimero za WhatsApp</b></label>
+  <textarea id="trcoseWhatsAppNumbers" rows="5" maxlength="12000" placeholder="0780000000
++250780000001
++250780000002"></textarea>
+  <label for="trcoseWhatsAppBody"><b>Ubutumwa bwa Trcose AI</b></label>
+  <textarea id="trcoseWhatsAppBody" rows="5" maxlength="4000" placeholder="Andika ubutumwa ushaka kohereza..."></textarea>
+  <p class="muted">Kohereza bikorwa gusa ku bantu bemeye kwakira ubutumwa bwa Trcose. Ubutumwa bwo hanze y'igihe cya WhatsApp cy'amasaha 24 bushobora gusaba template yemejwe na Meta.</p>
+  <button id="trcoseWhatsAppSendBtn" onclick="trcoseSendWhatsAppBroadcast()">📤 Ohereza ubutumwa kuri bose</button>
+  <p id="trcoseWhatsAppStatus" class="muted" role="status" aria-live="polite">Cloud API igomba kubanza gushyirwaho muri Supabase kugira ngo kohereza byikore.</p>
+  <div id="trcoseWhatsAppResult" class="muted"></div>
+ </div>
  <div id="adminUsersSection" class="panel hidden"><h3>🔐 Users & Activity</h3><p class="muted">Iyi tab igaragara ku ma-email yemewe gusa. “Recent activity” ni ibikorwa byanditswe muri product_events; si igipimo nyacyo cya online presence.</p><div class="stats"><div class="stat">🟢 Online now<br><b id="adminOnlineUsers">—</b></div><div class="stat">👥 Users<br><b id="adminUsersCount">—</b></div><div class="stat">🛍️ Products<br><b id="adminProductsCount">—</b></div><div class="stat">⚡ Recent events<br><b id="adminRecentEvents">—</b></div><div class="stat">💼 Jobs<br><b id="adminJobsCount">—</b></div></div><button class="secondary" onclick="loadAdminUsers()">🔄 Refresh users / activity</button><div id="adminUsersList"></div></div>
  <div id="adminVideoCampaignSection" class="panel hidden">
   <h3>🎬 Trcose AI — Video Campaigns</h3>
@@ -1394,6 +1409,41 @@ async function loadAdminComments(){
  box.innerHTML=data.map(c=>`<div class="card" style="padding:10px;margin:8px 0"><p>${escapeHTML(c.body||"")}</p><p class="muted">Product: ${escapeHTML(c.product_id||"")} · User: ${escapeHTML(c.user_id||"")}</p><button class="danger" onclick="adminDeleteComment('${c.id}')">🗑️ Delete comment</button></div>`).join("");
 }
 async function adminDeleteComment(id){if(!await isTrcoseAdmin()||!confirm("Urashaka gusiba iyi comment?"))return;const {error}=await supabaseClient.from("product_comments").delete().eq("id",id);if(error){alert("Comment ntiyasibwe. Reba admin RLS policy: "+error.message);return}await loadAdminComments()}
+// WhatsApp Cloud API frontend: secrets stay on the Supabase Edge Function, never in this HTML.
+function trcoseNormalizeWhatsAppNumber(value){
+ let n=String(value||"").replace(/[^0-9+]/g,"");
+ if(n.startsWith("00"))n="+"+n.slice(2);
+ if(n.startsWith("0"))n="+250"+n.slice(1);
+ if(n.startsWith("250"))n="+"+n;
+ if(/^\+?[1-9][0-9]{7,14}$/.test(n))return n.startsWith("+")?n:n;
+ return "";
+}
+async function trcoseSendWhatsAppBroadcast(){
+ const status=$("trcoseWhatsAppStatus"),result=$("trcoseWhatsAppResult"),btn=$("trcoseWhatsAppSendBtn");
+ if(!await isTrcoseAdmin()){alert("Iki gice kigenewe Admin wa Trcose gusa.");return;}
+ const raw=String($("trcoseWhatsAppNumbers")?.value||"");
+ const message=String($("trcoseWhatsAppBody")?.value||"").trim();
+ const rawNumbers=raw.split(/[\n,;]+/).map(x=>x.trim()).filter(Boolean);
+ const numbers=[...new Set(rawNumbers.map(trcoseNormalizeWhatsAppNumber).filter(Boolean))];
+ if(!numbers.length){if(status)status.textContent="Andika nibura nimero imwe yemewe. Urugero: 0780000000 cyangwa +250780000000.";return;}
+ if(numbers.length!==rawNumbers.length){if(status)status.textContent="Hari nimero zitari zo. Kosora nimero zose mbere yo kohereza.";return;}
+ if(!message){if(status)status.textContent="Banza wandike ubutumwa.";return;}
+ if(!confirm("Ugiye kohereza ubutumwa bumwe kuri "+numbers.length+" nimero. Emeza ko abo bantu bemeye kwakira ubutumwa bwa Trcose."))return;
+ if(btn)btn.disabled=true;if(result)result.textContent="";
+ if(status)status.textContent="Turimo kohereza ubutumwa binyuze kuri Trcose WhatsApp Cloud API...";
+ try{
+  const {data,error}=await supabaseClient.functions.invoke("trcose-whatsapp-send",{body:{phone_numbers:numbers,message}});
+  if(error)throw error;
+  const sent=Number(data?.sent_count||0),failed=Array.isArray(data?.failed)?data.failed:[];
+  if(status)status.textContent="Byoherejwe: "+sent+" / "+numbers.length+". Ibisigaye: "+failed.length+".";
+  if(result&&failed.length)result.textContent="Nimero zitagejejweho: "+failed.map(x=>String(x.phone||x.number||"unknown")+" — "+String(x.error||"error")).join("; ");
+  if(result&&!failed.length)result.textContent="Serivisi yemeje ko ubutumwa bwakiriwe na WhatsApp API. Delivery status nyayo igenzurwa na webhook.";
+ }catch(e){
+  console.error("Trcose WhatsApp Cloud API error",e);
+  if(status)status.textContent="Kohereza ntibyashobotse: "+String(e?.message||e)+". Reba ko Supabase Edge Function 'trcose-whatsapp-send' yashyizweho kandi ifite Meta secrets.";
+ }finally{if(btn)btn.disabled=false;}
+}
+
 async function showAdminDashboard(){if(!await isTrcoseAdmin()){alert("Nturi Admin wa Trcose.");return}showPage("admin");await loadAdminPayments()}
 
     function showAdminTab(t){
@@ -1406,6 +1456,7 @@ async function showAdminDashboard(){if(!await isTrcoseAdmin()){alert("Nturi Admi
   $("adminRevenueSection").classList.toggle("hidden", t !== "revenue");
   $("adminManagerSection").classList.toggle("hidden", t !== "managers");
   $("adminBroadcastSection")?.classList.toggle("hidden",t!=="broadcast");
+  $("adminWhatsAppSection")?.classList.toggle("hidden",t!=="whatsapp");
   $("adminUsersSection")?.classList.toggle("hidden",t!=="users");
   $("adminContentSection")?.classList.toggle("hidden",t!=="content");
   $("adminVideoCampaignSection")?.classList.toggle("hidden",t!=="videoCampaigns");
