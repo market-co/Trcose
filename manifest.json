@@ -3,6 +3,7 @@
   "id": "/Trcose/",
   "name": "Trcose Market",
   "short_name": "Trcose",
+  "description": "Trcose Market is an AI-powered marketplace for buying, selling, finding jobs, business services and online opportunities.",
   "start_url": "/Trcose/",
   "scope": "/Trcose/",
   "display": "standalone",
