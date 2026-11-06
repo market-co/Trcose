@@ -1,3 +1,4 @@
+
 {
   "id": "/Trcose/",
   "name": "Trcose Market",
@@ -8,6 +9,18 @@
   "background_color": "#ffffff",
   "theme_color": "#1769ff",
   "icons": [
+    {
+      "src": "/Trcose/icons/trcose-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Trcose/icons/trcose-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/Trcose/icons/trcose-ai-logo.svg",
       "sizes": "any",
