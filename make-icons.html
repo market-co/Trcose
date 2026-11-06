@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trcose Icon Generator</title>
+</head>
+<body style="font-family:Arial;text-align:center;padding:25px">
+<h2>Trcose AI Icon Generator</h2>
+<p>Kanda hano ukore icons zawe.</p>
+<button onclick="makeIcons()" style="padding:15px;background:#1769ff;color:white;border:0;border-radius:8px">
+GENERATE PNG ICONS
+</button>
+<p id="status"></p>
+<script>
+async function makeIcons(){
+ const status=document.getElementById('status');
+ status.textContent='Creating icons...';
+ try{
+  const response=await fetch('icons/trcose-ai-logo.svg');
+  if(!response.ok) throw new Error('Logo SVG not found');
+  const svg=await response.text();
+  const blob=new Blob([svg],{type:'image/svg+xml'});
+  const url=URL.createObjectURL(blob);
+  const img=new Image();
+  img.onload=()=>{
+   [192,512].forEach(size=>{
+    const canvas=document.createElement('canvas');
+    canvas.width=size;
+    canvas.height=size;
+    canvas.getContext('2d').drawImage(img,0,0,size,size);
+    canvas.toBlob(png=>{
+     const link=document.createElement('a');
+     link.href=URL.createObjectURL(png);
+     link.download='trcose-icon-'+size+'.png';
+     link.click();
+    },'image/png');
+   });
+   status.textContent='Icons created. Check your Downloads folder.';
+   URL.revokeObjectURL(url);
+  };
+  img.onerror=()=>{status.textContent='Could not read SVG logo.'};
+  img.src=url;
+ }catch(e){status.textContent='Error: '+e.message}
+}
+</script>
+</body>
+</html>
