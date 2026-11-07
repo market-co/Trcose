@@ -166,6 +166,22 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
 .earnFine{font-size:11px!important;color:#c5dcff!important}
 .earnLaunchBtn{display:block;width:100%;margin:12px 0;background:linear-gradient(90deg,#061c50,#087be8)!important;border:1px solid #63dfff!important;color:#fff!important;border-radius:14px!important;font-weight:900}
 @media(max-width:480px){.earnHero{gap:12px;padding:15px}.earnLogo{flex-basis:76px;width:76px;height:76px;border-radius:20px}.earnLogo svg{width:66px;height:66px}.earnCopy h2{font-size:21px}.earnCopy p{font-size:12px}.earnActions{gap:6px}.earnActions button{font-size:11px;padding:10px 9px}}
+
+/* Trcose Earn: separate Referral and Watch identities */
+.earnChoiceGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}
+.earnChoice{border-radius:22px;padding:18px;color:#10213e;overflow:hidden;box-shadow:0 10px 28px #10264a18;border:1px solid #dce8ff;background:linear-gradient(145deg,#f4faff,#e6f1ff)}
+.earnChoice.watch{background:linear-gradient(145deg,#fff8ff,#f0e8ff);border-color:#dfcaff}
+.earnChoiceHead{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.earnChoiceLogo{width:64px;height:64px;object-fit:cover;border-radius:18px;background:#fff;border:2px solid #fff;box-shadow:0 4px 14px #17255420}
+.earnChoice h3{margin:0;font-size:21px}.earnChoice p{line-height:1.5;margin:8px 0 14px}
+.earnChoice .earnShareBtn{width:100%;border:0;border-radius:13px;padding:12px;color:#fff;font-weight:900;background:linear-gradient(90deg,#087cf0,#1647d8)}
+.earnChoice.watch .earnShareBtn{background:linear-gradient(90deg,#922be8,#4d27c9)}
+.earnChoice .earnGoBtn{width:100%;margin-top:8px}
+.earnAdminGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.earnAdminCard{border:1px solid #dce4f0;border-radius:15px;padding:13px;background:#f8fbff}
+.earnAdminCard input,.earnAdminCard textarea{width:100%;box-sizing:border-box;margin:6px 0 10px}
+.earnAdminPreview{width:74px;height:74px;object-fit:cover;border-radius:15px;background:#eaf1ff;border:1px solid #d5dfef}
+@media(max-width:650px){.earnChoiceGrid,.earnAdminGrid{grid-template-columns:1fr}.earnChoice{padding:15px}}
 </style>
 
 </head>
@@ -445,6 +461,13 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
 <section id="ordersPage" class="page hidden"><div class="panel"><h2>🛒 Orders</h2><div id="ordersList"><p class="muted">Nta orders ziriho.</p></div></div></section>
 
 <section id="referralPage" class="page hidden">
+ <div class="panel" style="background:linear-gradient(120deg,#071f58,#1769ff);color:white;border:0"><h2 style="color:white;margin:0">💎 Trcose Earn</h2><p style="color:#e7f2ff;margin:7px 0 0">Hitamo uburyo bwo gukorera ibihembo kuri Trcose: gutumira inshuti cyangwa kureba video zemejwe.</p></div>
+ <div class="earnChoiceGrid">
+  <article class="earnChoice" id="earnReferralCard"><div class="earnChoiceHead"><img class="earnChoiceLogo" id="earnReferralLogo" alt="Trcose Referral logo" src="https://market-co.github.io/Trcose/icons/trcose-ai-logo.svg"><div><small style="color:#1769ff;font-weight:900">TRCOSE EARN</small><h3>🎁 Referral</h3></div></div><p id="earnReferralDescription">Sangiza link yawe, utumire inshuti muri Trcose kandi ubone ibihembo hakurikijwe amategeko ya gahunda.</p><button class="earnShareBtn" type="button" onclick="shareEarnSection('referral')">↗ Sangiza Referral</button><button class="earnGoBtn secondary" type="button" onclick="document.getElementById('referralDetailsPanel').scrollIntoView({behavior:'smooth'})">Fungura Referral</button></article>
+  <article class="earnChoice watch" id="earnWatchCard"><div class="earnChoiceHead"><img class="earnChoiceLogo" id="earnWatchLogo" alt="Trcose Watch Video logo" src="https://market-co.github.io/Trcose/icons/trcose-ai-logo.svg"><div><small style="color:#792be0;font-weight:900">TRCOSE EARN</small><h3>▶ Watch Video</h3></div></div><p id="earnWatchDescription">Reba amashusho yemejwe na Trcose, ukusanye ibihembo biteganywa kuri buri video.</p><button class="earnShareBtn" type="button" onclick="shareEarnSection('watch')">↗ Sangiza Watch Video</button><button class="earnGoBtn secondary" type="button" onclick="document.getElementById('videoRewardsPanel').scrollIntoView({behavior:'smooth'})">Reba Video Rewards</button></article>
+ </div>
+ <p class="muted" style="font-size:12px">Kumenyekanisha Referral na Watch Video biratandukanye. Gushyiraho cyangwa kohereza video bikorwa mu bikoresho byabigenewe, ntibikorwa kuri aya makarita.</p>
+
  <section class="earnHero" aria-label="Trcose AI Video Earn">
   <div class="earnLogo" role="img" aria-label="Trcose AI Video and Coin logo">
    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -474,7 +497,7 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
    <button type="button" class="secondary" onclick="trcoseShareEarnPage()">🔗 Sangiza iyi paji</button>
   </div>
  </section>
- <div class="panel"><h2>🎁 Referral Program</h2>
+ <div class="panel" id="referralDetailsPanel"><h2>🎁 Referral Program</h2>
   <p>Iyo umuntu mushya yinjiye akoresheje referral code yawe, bonus ni <b>200 RWF</b> hashingiwe kuri rules za database.</p>
   <div class="notice"><b>Referral Code yawe:</b><div style="font-size:24px;font-weight:900;margin:8px 0" id="myReferralCode">...</div>
    <button onclick="copyReferralCode()">📋 Copy Code</button><button class="secondary" onclick="copyReferralLink()">🔗 Copy Link</button><button class="secondary" onclick="shareReferral()">↗️ Share</button>
@@ -551,9 +574,14 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
   <button class="secondary" onclick="showAdminTab('users')">🔐 Users & Activity</button>
   <button class="secondary" onclick="showAdminTab('content')">🧹 Posts & Jobs</button>
   <button class="secondary" onclick="showAdminTab('videoCampaigns')">🎬 Video Campaigns</button>
+  <button class="secondary" onclick="showAdminTab('earnBranding')">🎨 Earn Logos & Descriptions</button>
   <button class="secondary" onclick="openAdminAd()">📢 New Ad</button>
  </div>
  <div class="panel"><button onclick="loadAdminPayments()">🔄 Refresh</button> <button class="secondary" onclick="showPage('home')">🏠 Home</button></div>
+ <div id="adminEarnBrandingSection" class="panel hidden"><h3>🎨 Trcose Earn — Logo n'ibisobanuro</h3><p class="muted">Admin wenyine ni we uhindura logo/ifoto n'ibisobanuro bya Referral na Watch Video. Ibi ntibihindura uburyo video zishyirwaho.</p><div class="earnAdminGrid">
+ <div class="earnAdminCard"><h4>🎁 Referral</h4><img id="adminReferralPreview" class="earnAdminPreview" alt="Referral preview"><label>Hitamo logo cyangwa ifoto</label><input id="adminReferralFile" type="file" accept="image/*"><label>URL y'ifoto (niba isanzwe iri kuri internet)</label><input id="adminReferralImageUrl" type="url" placeholder="https://..."><label>Ibisobanuro</label><textarea id="adminReferralDescription" rows="4" maxlength="500"></textarea><button type="button" onclick="saveEarnBranding('referral')">💾 Bika Referral</button></div>
+ <div class="earnAdminCard"><h4>▶ Watch Video</h4><img id="adminWatchPreview" class="earnAdminPreview" alt="Watch Video preview"><label>Hitamo logo cyangwa ifoto</label><input id="adminWatchFile" type="file" accept="image/*"><label>URL y'ifoto (niba isanzwe iri kuri internet)</label><input id="adminWatchImageUrl" type="url" placeholder="https://..."><label>Ibisobanuro</label><textarea id="adminWatchDescription" rows="4" maxlength="500"></textarea><button type="button" onclick="saveEarnBranding('watch')">💾 Bika Watch Video</button></div>
+ </div><p id="earnBrandingMessage" class="muted" aria-live="polite"></p><button type="button" class="secondary" onclick="loadEarnBranding(true)">🔄 Ongera urebe</button></div>
  <div id="adminPaymentSection" class="panel"><div id="adminPaymentList">Loading...</div></div>
  <div id="adminApplicationsSection" class="panel hidden"><h3>📨 Job applications / Abasaba akazi</h3><p class="muted">Reba amakuru yose y’usaba akazi, ubusabe bwe, CV, hanyuma wemeze cyangwa wange.</p><div class="actionRow"><button onclick="loadAdminJobApplications()">🔄 Refresh applications</button></div><div id="adminApplicationsList">Kanda Refresh.</div></div>
  <div id="adminWithdrawalSection" class="panel hidden"><div id="adminWithdrawalList"></div></div>
@@ -725,7 +753,9 @@ async function init(){
  await loadProducts();renderProducts();await loadMixedPublicFeed();
  if(user){Promise.allSettled([loadProfile(),refreshJobAccess(),refreshExamAccess()]).catch(e=>console.warn('Profile background tasks',e))}
  // A direct share URL opens the dedicated Video Earn / Referral page.
- try{const routeParams=new URLSearchParams(window.location.search);if(routeParams.get('earn')==='1'){showPage('referral');window.scrollTo(0,0)}}catch(e){console.warn('Earn route error',e)}
+ try{const routeParams=new URLSearchParams(window.location.search);const earnSection=routeParams.get('section')||routeParams.get('earn');if(['1','referral','watch'].includes(earnSection)){showPage('referral');window.scrollTo(0,0);setTimeout(()=>{const target=earnSection==='watch'?'videoRewardsPanel':(earnSection==='referral'?'referralDetailsPanel':null);if(target)$(target)?.scrollIntoView({behavior:'smooth',block:'start'})},350)}}catch(e){console.warn('Earn route error',e)}
+ loadEarnBranding(false);
+ try{const refCode=new URLSearchParams(window.location.search).get('ref');if(refCode){showPage('referral');const field=$('referralInput');if(field)field.value=refCode.toUpperCase();}}catch(e){}
  // Open a product when someone visits a shared Trcose link such as ?product=UUID.
  try{const sharedProductId=new URLSearchParams(window.location.search).get("product");if(sharedProductId){const sharedProduct=products.find(p=>String(p.id)===String(sharedProductId))||demoProducts.find(p=>String(p.id)===String(sharedProductId));if(sharedProduct){await openProduct(sharedProductId)}else{const details=$("productDetails");if(details)details.innerHTML="<div class='notice'>Iki gicuruzwa ntikiboneka kuri public cyangwa link si yo.</div>"}}}catch(e){console.warn("Shared product link error",e)}
  loadPublicAds();
@@ -771,13 +801,7 @@ async function trcoseRequestAccountVerification(){
   startPayment('account_verification',2000);
  }catch(e){if(msg)msg.textContent='Turimo gutegura ubusabe bushya bwa Verify Account.';startPayment('account_verification',2000);}
 }
-async function trcoseShareEarnPage(){
- const url=window.location.origin+window.location.pathname+'?earn=1';
- const title='Trcose AI — Reba Video Win Coins';
- try{if(navigator.share){await navigator.share({title,text:'Reba video, win coins kandi utumire inshuti kuri Trcose.',url});return}}catch(e){}
- try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(url);alert('Link ya Trcose Earn yandukuwe.');return}}catch(e){}
- prompt('Koporora link ya Trcose Earn:',url);
-}
+async function trcoseShareEarnPage(){shareEarnSection('watch')}
 function trcoseVideoEmbed(url){
  try{const u=new URL(url);if(['youtube.com','www.youtube.com','m.youtube.com','youtu.be'].includes(u.hostname)){let id=u.hostname==='youtu.be'?u.pathname.slice(1):(u.searchParams.get('v')||u.pathname.split('/').filter(Boolean).pop());return id?'https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)+'?rel=0&modestbranding=1':'';}if(u.hostname==='www.facebook.com'||u.hostname==='facebook.com'||u.hostname==='m.facebook.com')return 'https://www.facebook.com/plugins/video.php?href='+encodeURIComponent(url)+'&show_text=false';if(u.hostname==='www.tiktok.com'||u.hostname==='tiktok.com')return '';
  return '';}catch(e){return ''}
@@ -987,7 +1011,19 @@ async function shareItem(title,url){
 function trcoseShareUrl(type,id){const u=new URL("https://trcose.netlify.app/.netlify/functions/share");u.searchParams.set("type",String(type));u.searchParams.set("id",String(id));return u.toString()}
 function shareProduct(id){const p=products.find(x=>String(x.id)===String(id))||demoProducts.find(x=>String(x.id)===String(id));if(!p){alert("Igicuruzwa nticyabonetse.");return}if(String(id).startsWith("demo")){alert("Iyi ni demo product; share ikora kuri product iri muri Supabase.");return}shareItem((p.name||"Trcose Product")+" — Trcose Market",trcoseShareUrl("product",id))}
 async function shareVideoPost(id){try{await supabaseClient.from("product_events").insert({product_id:id,event_type:"share",user_id:user?.id||null})}catch(e){} const p=products.find(x=>String(x.id)===String(id));if(p)shareItem(p.name||"Trcose Video",trcoseShareUrl("product",id));await loadFreeVideoPosts();if(user)await loadMyVideoStats()}
-function shareReferral(){const c=$("myReferralCode")?.textContent?.trim()||"";shareItem("Trcose Referral "+c,location.href.split("?")[0]+"?ref="+encodeURIComponent(c))}
+function shareReferral(){shareEarnSection("referral")}
+
+// Trcose Earn branding is shared publicly through Supabase table trcose_earn_branding.
+const TRCOSE_EARN_BRANDING_DEFAULTS={
+ referral:{title:"Trcose Referral",description:"Sangiza link yawe, utumire inshuti muri Trcose kandi ubone ibihembo hakurikijwe amategeko ya gahunda.",image_url:""},
+ watch:{title:"Trcose Watch Video",description:"Reba amashusho yemejwe na Trcose, ukusanye ibihembo biteganywa kuri buri video.",image_url:""}
+};
+let trcoseEarnBranding={referral:{...TRCOSE_EARN_BRANDING_DEFAULTS.referral},watch:{...TRCOSE_EARN_BRANDING_DEFAULTS.watch}};
+function applyEarnBranding(){for(const key of ["referral","watch"]){const row=trcoseEarnBranding[key]||TRCOSE_EARN_BRANDING_DEFAULTS[key];const prefix=key==="referral"?"Referral":"Watch";const img=$(key==="referral"?"earnReferralLogo":"earnWatchLogo");const desc=$(key==="referral"?"earnReferralDescription":"earnWatchDescription");if(img)img.src=row.image_url||"https://market-co.github.io/Trcose/icons/trcose-ai-logo.svg";if(desc)desc.textContent=row.description||TRCOSE_EARN_BRANDING_DEFAULTS[key].description;const preview=$(key==="referral"?"adminReferralPreview":"adminWatchPreview");if(preview)preview.src=row.image_url||"https://market-co.github.io/Trcose/icons/trcose-ai-logo.svg";const field=$(key==="referral"?"adminReferralDescription":"adminWatchDescription");if(field)field.value=row.description||TRCOSE_EARN_BRANDING_DEFAULTS[key].description;const urlField=$(key==="referral"?"adminReferralImageUrl":"adminWatchImageUrl");if(urlField)urlField.value=row.image_url||"";}}
+async function loadEarnBranding(showAdmin=false){try{const {data,error}=await supabaseClient.from("trcose_earn_branding").select("section_key,title,description,image_url");if(error)throw error;for(const row of data||[]){if(["referral","watch"].includes(row.section_key))trcoseEarnBranding[row.section_key]={...TRCOSE_EARN_BRANDING_DEFAULTS[row.section_key],...row};}applyEarnBranding();if(showAdmin){if(!await isTrcoseAdmin()){if($("earnBrandingMessage"))$("earnBrandingMessage").textContent="Admin gusa ni we wemerewe guhindura ibi.";return;}if($("earnBrandingMessage"))$("earnBrandingMessage").textContent="Amakuru ya branding yagezweho.";}}catch(e){applyEarnBranding();if(showAdmin&&$("earnBrandingMessage"))$("earnBrandingMessage").textContent="Ntibyashobotse kuzana branding: "+(e.message||e)+". Reba niba SQL ya Trcose Earn Branding yarashyizwe muri Supabase."}}
+async function saveEarnBranding(key){if(!["referral","watch"].includes(key)||!await isTrcoseAdmin()){alert("Admin wa Trcose gusa ni we wemerewe.");return;}const msg=$("earnBrandingMessage");try{const cap=key==="referral"?"Referral":"Watch";let imageUrl=$(key==="referral"?"adminReferralImageUrl":"adminWatchImageUrl").value.trim();const file=$(key==="referral"?"adminReferralFile":"adminWatchFile").files?.[0];if(file){if(!file.type.startsWith("image/"))throw new Error("Hitamo ifoto gusa.");if(file.size>5*1024*1024)throw new Error("Ifoto irengeje 5 MB.");const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"");const path="earn-branding/"+key+"-"+Date.now()+"."+ext;const {error:upErr}=await supabaseClient.storage.from("product-images").upload(path,file,{upsert:true,contentType:file.type});if(upErr)throw upErr;imageUrl=supabaseClient.storage.from("product-images").getPublicUrl(path).data.publicUrl;}const description=$(key==="referral"?"adminReferralDescription":"adminWatchDescription").value.trim();if(!description)throw new Error("Andika ibisobanuro mbere yo kubika.");const payload={section_key:key,title:key==="referral"?"Trcose Referral":"Trcose Watch Video",description,image_url:imageUrl,updated_at:new Date().toISOString(),updated_by:user.id};const {error}=await supabaseClient.from("trcose_earn_branding").upsert(payload,{onConflict:"section_key"});if(error)throw error;trcoseEarnBranding[key]={...payload};applyEarnBranding();if(msg)msg.textContent=cap+" branding yabitswe neza.";}catch(e){if(msg)msg.textContent="Kubika ntibyashobotse: "+(e.message||e)+". Reba SQL na storage policy."}}
+function earnSectionShareUrl(section,ref=""){const u=new URL("https://trcose.netlify.app/.netlify/functions/earn-share");u.searchParams.set("section",section);if(ref)u.searchParams.set("ref",ref);return u.toString()}
+function shareEarnSection(section){const ref=section==="referral"?($("myReferralCode")?.textContent||"").trim():"";const title=section==="referral"?"Trcose Referral — Tumira inshuti, ubone ibihembo":"Trcose Watch Video — Reba video zemejwe";const url=earnSectionShareUrl(section,ref);shareItem(title,url)}
 
 async function loadProfile(){
  if(!user)return;const {data}=await supabaseClient.from("profiles").select("*").eq("id",user.id).maybeSingle();
@@ -1570,6 +1606,7 @@ async function trcoseSendWhatsAppBroadcast(){
 async function showAdminDashboard(){if(!await isTrcoseAdmin()){alert("Nturi Admin wa Trcose.");return}showPage("admin");await loadAdminPayments()}
 
     function showAdminTab(t){
+  $("adminEarnBrandingSection")?.classList.toggle("hidden",t!=="earnBranding");
   $("adminPaymentSection").classList.toggle("hidden", t !== "payments");
   $("adminApplicationsSection")?.classList.toggle("hidden", t !== "applications");
   $("adminWithdrawalSection").classList.toggle("hidden", t !== "withdrawals");
@@ -1593,6 +1630,7 @@ async function showAdminDashboard(){if(!await isTrcoseAdmin()){alert("Nturi Admi
   if(t === "broadcast") loadAdminBroadcastHistory();
   if(t === "content") {loadAdminContent();loadAdminComments()}
   if(t === "videoCampaigns") {trcoseLoadAdminCampaigns();trcoseLoadAdminClaims()}
+  if(t === "earnBranding") loadEarnBranding(true);
   if(t === "examManager") {
     resetAdminExamBuilder();
     loadAdminExamManager();
