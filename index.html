@@ -1627,5 +1627,14 @@ ${escapeHTML(String(e.duration_minutes||0))} min · 🎯 ${escapeHTML(String(e.p
 </script>
 <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
 
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/Trcose/service-worker.js")
+      .catch(error => console.error("Trcose Service Worker:", error));
+  });
+}
+</script>
+
 </body>
 </html>
