@@ -4,11 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#1769ff">
-<link rel="manifest" href="/Trcose/manifest.json">
+<link rel="manifest" href="manifest.json">
 <meta name="google-site-verification" content="1INuEOCUMyd_z8wVb7xFbtmvDiZ5Hg9AheqauJsDdH4" />
     <title>Trcose Market</title>
 <meta name="application-name" content="Trcose">
 <meta name="description" content="Trcose Market — marketplace, jobs, business tools, video rewards and referrals.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://market-co.github.io/Trcose/">
 <link rel="preconnect" href="https://brretfrzuvyjrsbsjjml.supabase.co" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="dns-prefetch" href="https://translate.google.com">
@@ -468,6 +470,7 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
    </div>
    <p class="earnFine">Ubwishyu bwa Verify Account bubanza kubona ID yo gukurikirana; Admin ni we wemeza payment nyuma yo kugenzura gihamya.</p>
    <p id="accountVerificationMessage" class="earnFine" aria-live="polite"></p>
+   <div id="trcoseVerificationStatus" class="compatNotice" aria-live="polite">Injira cyangwa wiyandikishe kugira ngo usabe Verify Account.</div>
    <button type="button" class="secondary" onclick="trcoseShareEarnPage()">🔗 Sangiza iyi paji</button>
   </div>
  </section>
@@ -496,8 +499,8 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
   <div class="smallgrid"><select id="fxFrom"><option value="RWF">RWF – Rwanda</option><option value="USD">USD – US Dollar</option><option value="EUR">EUR – Euro</option><option value="KES">KES – Kenya</option><option value="UGX">UGX – Uganda</option><option value="TZS">TZS – Tanzania</option><option value="BIF">BIF – Burundi</option><option value="CDF">CDF – Congo</option></select><select id="fxTo"><option value="USD">USD – US Dollar</option><option value="RWF">RWF – Rwanda</option><option value="EUR">EUR – Euro</option><option value="KES">KES – Kenya</option><option value="UGX">UGX – Uganda</option><option value="TZS">TZS – Tanzania</option><option value="BIF">BIF – Burundi</option><option value="CDF">CDF – Congo</option></select></div>
   <button type="button" onclick="convertTrcoseCurrency()">💱 Hindura</button><p id="fxResult" class="notice" aria-live="polite">Tegereza igipimo cy'amafaranga...</p><small id="fxUpdated" class="muted">Igipimo kizatangwa na serivisi yo guhindura amafaranga.</small>
  </div>
- <div class="panel"><h2>💸 Withdraw</h2><p>Minimum withdrawal: <b>70,000 RWF</b>.</p>
-  <input id="withdrawAmount" type="number" min="70000" step="1000" placeholder="Amount RWF">
+ <div class="panel"><h2>💸 Withdraw</h2><p>Minimum withdrawal: <b>100,000 RWF</b>.</p>
+  <input id="withdrawAmount" type="number" min="100000" step="1000" placeholder="Amount RWF">
   <select id="withdrawMethod"><option value="mtn">MTN Mobile Money</option><option value="equity">Equity Bank</option></select>
   <input id="withdrawAccount" placeholder="MTN phone cyangwa Equity account"><button onclick="requestWithdrawal()">💸 Saba Withdraw</button>
   <p id="withdrawMessage" class="muted"></p>
@@ -718,15 +721,8 @@ async function updateAdminUI(){$("adminNavBtn").style.display=await isTrcoseAdmi
 async function refreshUser(){const {data}=await supabaseClient.auth.getUser();user=data.user||null;await updateAdminUI();if(user){await loadProfile();await loadWallet();await loadTrcosePublicMessages(false)}}
 async function init(){
  const {data}=await supabaseClient.auth.getSession();user=data.session?.user||null;await updateAdminUI();startTrcosePresence();
- supabaseClient.auth.onAuthStateChange((event,session)=>{const nextUser=session?.user||null;const presenceIdentityChanged=(user?.id||null)!==(nextUser?.id||null);user=nextUser;if(presenceIdentityChanged)startTrcosePresence();if(event==="PASSWORD_RECOVERY"){$("passwordRecoveryModal")?.classList.add("show");closeAuth()}setTimeout(async()=>{await updateAdminUI();if(user){await loadProfile();await loadFollowStats();await loadProfileFollowers();await loadMyPosts();await loadTrcosePublicMessages(false);let verifyAfterAuth=false;try{verifyAfterAuth=sessionStorage.getItem("trcose_after_auth_verify")==="1";if(verifyAfterAuth)sessionStorage.removeItem("trcose_after_auth_verify")}catch(e){}if(verifyAfterAuth){showPage("referral");setTimeout(()=>trcoseRequestAccountVerification(),400)}}renderProducts();loadMixedPublicFeed();loadFreeVideoPosts()},0)});
- // Do not make the Home screen wait for Supabase. Render a lightweight fallback first,
- // then replace it when the products request finishes (important on older Android/Chrome).
- products=demoProducts;renderProducts();loadMixedPublicFeed();
- loadProducts().then(()=>{renderProducts();return loadMixedPublicFeed()}).catch(error=>{
-  console.warn("Products background load failed",error);
-  if(!products||!products.length)products=demoProducts;
-  renderProducts();loadMixedPublicFeed();
- });
+ supabaseClient.auth.onAuthStateChange((event,session)=>{const nextUser=session?.user||null;const presenceIdentityChanged=(user?.id||null)!==(nextUser?.id||null);user=nextUser;if(presenceIdentityChanged)startTrcosePresence();if(event==="PASSWORD_RECOVERY"){$("passwordRecoveryModal")?.classList.add("show");closeAuth()}setTimeout(async()=>{await updateAdminUI();if(user){await loadProfile();await loadFollowStats();await loadProfileFollowers();await loadMyPosts();await loadTrcosePublicMessages(false);let openReferral=false;try{openReferral=sessionStorage.getItem('trcose_open_referral_after_auth')==='1';if(openReferral)sessionStorage.removeItem('trcose_open_referral_after_auth')}catch(e){}if(openReferral){showPage('referral');await trcoseRefreshVerificationStatus();$('accountVerificationMessage')?.scrollIntoView({behavior:'smooth',block:'center'});}}renderProducts();loadMixedPublicFeed();loadFreeVideoPosts()},0)});
+ await loadProducts();renderProducts();await loadMixedPublicFeed();
  if(user){Promise.allSettled([loadProfile(),refreshJobAccess(),refreshExamAccess()]).catch(e=>console.warn('Profile background tasks',e))}
  // A direct share URL opens the dedicated Video Earn / Referral page.
  try{const routeParams=new URLSearchParams(window.location.search);if(routeParams.get('earn')==='1'){showPage('referral');window.scrollTo(0,0)}}catch(e){console.warn('Earn route error',e)}
@@ -740,12 +736,40 @@ async function init(){
 let trcoseWatchTimer=null,trcoseWatchStart=null,trcoseActiveCampaign=null,trcoseWatchSeconds=0;
 function trcoseCoinValueRwf(coins){return Math.round((Number(coins)||0)*15/50)}
 function openEarnPage(){window.location.href=window.location.pathname+'?earn=1'}
-function trcoseEarnRegister(){if(!user){try{sessionStorage.setItem('trcose_after_auth_verify','1')}catch(e){}openAuth();return}showPage('referral');$('videoRewardsPanel')?.scrollIntoView({behavior:'smooth',block:'start'})}
-function trcoseRequestAccountVerification(){
+function trcoseEarnRegister(){
+ if(!user){try{sessionStorage.setItem('trcose_open_referral_after_auth','1')}catch(e){}openAuth();return}
+ showPage('referral');
+ trcoseRefreshVerificationStatus();
+ $('videoRewardsPanel')?.scrollIntoView(true);
+}
+async function trcoseRefreshVerificationStatus(){
+ const box=$('trcoseVerificationStatus');if(!box)return false;
+ if(!user){box.textContent='Injira cyangwa wiyandikishe, hanyuma wishyure 2,000 RWF kugira ngo konti yemezwe.';return false;}
+ box.textContent='Turimo kugenzura niba Admin yemeje Verify Account...';
+ try{
+  const {data,error}=await supabaseClient.rpc('trcose_is_account_verified');
+  if(error)throw error;
+  const verified=data===true;
+  if(verified){box.className='success';box.textContent='✓ Konti yawe yemejwe. Ushobora kureba video no gukusanya coins.';}
+  else{box.className='compatNotice';box.textContent='Konti ntiraremezwa. Wishyure 2,000 RWF; nyuma Admin ayemeze. N’iyo ukanda kuri video, uzabona Verify Account.';}
+  return verified;
+ }catch(e){
+  box.className='notice';box.textContent='Ntitwashoboye kugenzura Verify Account. Video Earn irafunze by’agateganyo kugeza igenzura rya Supabase rikozwe. '+(e?.message||'');
+  return false;
+ }
+}
+async function trcoseRequestAccountVerification(){
  const msg=$('accountVerificationMessage');
- if(!user){if(msg)msg.textContent='Banza wiyandikishe cyangwa winjire muri Trcose, hanyuma usabe Verify Account.';openAuth();return}
- if(msg)msg.textContent='Uzuza ubwishyu bwa 2,000 RWF. ID yo gukurikirana izagaragara nyuma yo kohereza request.';
- startPayment('account_verification',2000);
+ if(!user){try{sessionStorage.setItem('trcose_open_referral_after_auth','1')}catch(e){}if(msg)msg.textContent='Banza wiyandikishe cyangwa winjire muri Trcose.';openAuth();return}
+ const verified=await trcoseRefreshVerificationStatus();
+ if(verified){if(msg)msg.textContent='Konti yawe yamaze kwemezwa na Admin. Ushobora kureba video.';return;}
+ try{
+  const {data:pending,error}=await supabaseClient.from('payments').select('id,status,amount').eq('user_id',user.id).eq('purpose','account_verification').eq('amount',2000).eq('status','pending').order('created_at',{ascending:false}).limit(1);
+  if(error)throw error;
+  if(!error&&pending&&pending.length){if(msg)msg.textContent='Ufite ubusabe bwa Verify Account butegereje Admin. Payment ID: '+pending[0].id+'. Niba warishyuye, ohereza gihamya kuri WhatsApp Support.';return;}
+  if(msg)msg.textContent='Uzuza ubwishyu bwa 2,000 RWF. Nyuma yo kohereza request, Admin azagenzura ubwishyu.';
+  startPayment('account_verification',2000);
+ }catch(e){if(msg)msg.textContent='Turimo gutegura ubusabe bushya bwa Verify Account.';startPayment('account_verification',2000);}
 }
 async function trcoseShareEarnPage(){
  const url=window.location.origin+window.location.pathname+'?earn=1';
@@ -762,9 +786,29 @@ function updateCampaignCoinPreview(){const m=Number($('vcMinutes')?.value||5);if
 let trcoseFxRates=null,trcoseFxLoadedAt=0;
 async function convertTrcoseCurrency(){const amount=Number($('fxAmount')?.value||0),from=$('fxFrom')?.value||'RWF',to=$('fxTo')?.value||'USD',out=$('fxResult');if(!out)return;if(!Number.isFinite(amount)||amount<0){out.textContent='Andika umubare w’amafaranga wemewe.';return}out.textContent='Turimo kuzana igipimo...';try{if(!trcoseFxRates||Date.now()-trcoseFxLoadedAt>3600000){const r=await fetch('https://open.er-api.com/v6/latest/RWF',{cache:'no-store'});if(!r.ok)throw new Error('Rate service unavailable');const j=await r.json();if(j.result!=='success'||!j.rates)throw new Error('Exchange rate not available');trcoseFxRates=j.rates;trcoseFxLoadedAt=Date.now();$('fxUpdated').textContent='Igipimo giheruka: '+(j.time_last_update_utc||'ubu')+' · Kigaragaza igipimo cy’isoko, si igiciro cya banki.'}const rwf=from==='RWF'?amount:amount/(trcoseFxRates[from]||0);const result=to==='RWF'?rwf:rwf*(trcoseFxRates[to]||0);if(!Number.isFinite(result))throw new Error('Currency pair not supported');out.textContent=amount.toLocaleString()+' '+from+' ≈ '+result.toLocaleString(undefined,{maximumFractionDigits:2})+' '+to;}catch(e){out.textContent='Ntibyashobotse kubona igipimo. Reba internet wongere ugerageze.';}}
 async function trcoseLoadCampaigns(){const box=$("videoCampaignList");if(!box)return;if(!user){box.innerHTML='<p class="muted">Injira muri Trcose kugira ngo ubone campaigns.</p>';return}box.innerHTML='Loading...';const {data,error}=await supabaseClient.from('video_campaigns').select('id,title,video_url,required_minutes,reward_coins,status,created_at').eq('status','active').order('created_at',{ascending:false}).limit(30);if(error){box.innerHTML='<p class="error">Campaign tables ntizashyizweho. Shyira SQL ya Trcose Video Rewards muri Supabase SQL Editor. '+escapeHTML(error.message)+'</p>';return}if(!data?.length){box.innerHTML='<p class="muted">Nta video campaign iriho ubu.</p>';return}box.innerHTML=data.map(c=>`<article class="card" style="padding:12px;margin:10px 0"><b>${escapeHTML(c.title)}</b><p class="muted">⏱️ ${Number(c.required_minutes)} min · ⭐ ${(Number(c.required_minutes)*100000).toLocaleString()} Trcose Points · 🪙 ${Number(c.required_minutes)*50} coins (${trcoseCoinValueRwf(Number(c.required_minutes)*50).toLocaleString()} RWF)</p><button onclick="trcoseStartWatch('${c.id}')">▶️ Reba video</button></article>`).join('')}
-async function trcoseStartWatch(id){if(!user){openAuth();return}trcoseStopWatch(false);const {data:c,error}=await supabaseClient.from('video_campaigns').select('*').eq('id',id).eq('status','active').maybeSingle();if(error||!c){$('videoRewardMessage').textContent='Iyi campaign ntibonetse cyangwa yarangiye.';return}const embed=trcoseVideoEmbed(c.video_url);const box=$('videoWatchBox');box.classList.remove('hidden');box.innerHTML=`<b>${escapeHTML(c.title)}</b><p class="muted">Igihe kibarwa igihe player iri muri Trcose kandi tab iri imbere. Iyi timer ntishobora kwemeza ko video itigeze ihagarikwa muri player yo hanze; Admin agenzura claim mbere yo kwishyura.</p>${embed?`<div style="position:relative;padding-top:56.25%;background:#101828;border-radius:12px;overflow:hidden"><iframe src="${escapeHTML(embed)}" title="Campaign video" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>`:`<p>Video ntishobora kwerekanwa muri Trcose. Fungura link hano:</p><a href="${escapeHTML(c.video_url)}" target="_blank" rel="noopener">Fungura video</a><p class="muted">Igihe cyo hanze ntigishobora kugenzurwa neza; ntuzahabwa reward yikora kuri iyi link.</p>`}<p>Hasigaye: <b id="vcTimer">${Number(c.required_minutes)*60}s</b></p><p>Points uzabona: <b>${(Number(c.required_minutes)*100000).toLocaleString()} Trcose Points</b> (points zo muri Trcose, si views zo kuri YouTube/TikTok).</p><button class="secondary" onclick="trcoseStopWatch(true)">Hagarika</button><button id="vcClaimBtn" disabled onclick="trcoseSubmitClaim()">🎁 Saba coins</button>`;if(!embed){return}const {data:claim,error:claimErr}=await supabaseClient.rpc('trcose_video_start',{p_campaign_id:id});if(claimErr){$('videoRewardMessage').textContent='Ntibyashobotse gutangira: '+claimErr.message;return}trcoseActiveCampaign={...c,claim_id:claim};trcoseWatchSeconds=0;trcoseWatchTimer=setInterval(()=>{if(document.visibilityState!=='visible')return;trcoseWatchSeconds++;const left=Math.max(0,Number(c.required_minutes)*60-trcoseWatchSeconds);const t=$('vcTimer');if(t)t.textContent=left+'s';if(left===0){clearInterval(trcoseWatchTimer);trcoseWatchTimer=null;const b=$('vcClaimBtn');if(b)b.disabled=false}},1000)}
+async function trcoseStartWatch(id){
+ if(!user){trcoseEarnRegister();return;}
+ trcoseStopWatch(false);
+ const verified=await trcoseRefreshVerificationStatus();
+ if(!verified){
+  const box=$('videoWatchBox');box.classList.remove('hidden');
+  box.innerHTML='<b>🛡️ Verify Your Account irakenewe</b><p>Kwemeza konti bisaba 2,000 RWF. Niba utarabanje gukanda Verify Account, nta kibazo: hano ni ho uzayisabira. Amaze kwemezwa na Admin, video izafunguka.</p><button type="button" class="verifyEarnBtn" onclick="trcoseRequestAccountVerification()">🛡️ Verify Your Account · 2,000 RWF</button>';
+  $('accountVerificationMessage').textContent='Kugira ngo urebe iyi video, banza wemeze konti yawe.';
+  $('accountVerificationMessage').scrollIntoView(true);
+  return;
+ }
+ const {data:c,error}=await supabaseClient.from('video_campaigns').select('*').eq('id',id).eq('status','active').maybeSingle();
+ if(error||!c){$('videoRewardMessage').textContent='Iyi campaign ntibonetse cyangwa yarangiye.';return;}
+ const embed=trcoseVideoEmbed(c.video_url);const box=$('videoWatchBox');box.classList.remove('hidden');
+ box.innerHTML=`<b>${escapeHTML(c.title)}</b><p class="muted">Igihe kibarwa igihe player iri muri Trcose kandi tab iri imbere. Admin agenzura claim mbere yo kwemeza reward.</p>${embed?`<div style="position:relative;padding-top:56.25%;background:#101828;border-radius:12px;overflow:hidden"><iframe src="${escapeHTML(embed)}" title="Campaign video" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>`:`<p>Video ntishobora kwerekanwa muri Trcose. Fungura link hano:</p><a href="${escapeHTML(c.video_url)}" target="_blank" rel="noopener">Fungura video</a><p class="muted">Igihe cyo hanze ntigishobora kugenzurwa neza; ntuzahabwa reward yikora kuri iyi link.</p>`}<p>Hasigaye: <b id="vcTimer">${Number(c.required_minutes)*60}s</b></p><p>Points uzabona: <b>${(Number(c.required_minutes)*100000).toLocaleString()} Trcose Points</b>.</p><button class="secondary" onclick="trcoseStopWatch(true)">Hagarika</button><button id="vcClaimBtn" disabled onclick="trcoseSubmitClaim()">🎁 Saba coins</button>`;
+ if(!embed)return;
+ const {data:claim,error:claimErr}=await supabaseClient.rpc('trcose_video_start',{p_campaign_id:id});
+ if(claimErr){$('videoRewardMessage').textContent='Ntibyashobotse gutangira: '+claimErr.message;box.innerHTML='<div class="notice">'+escapeHTML(claimErr.message)+'</div>';return;}
+ trcoseActiveCampaign={...c,claim_id:claim};trcoseWatchSeconds=0;
+ trcoseWatchTimer=setInterval(()=>{if(document.visibilityState!=='visible')return;trcoseWatchSeconds++;const left=Math.max(0,Number(c.required_minutes)*60-trcoseWatchSeconds);const t=$('vcTimer');if(t)t.textContent=left+'s';if(left===0){clearInterval(trcoseWatchTimer);trcoseWatchTimer=null;const b=$('vcClaimBtn');if(b)b.disabled=false;}},1000);
+}
 function trcoseStopWatch(hide=true){if(trcoseWatchTimer)clearInterval(trcoseWatchTimer);trcoseWatchTimer=null;trcoseActiveCampaign=null;if(hide)$('videoWatchBox')?.classList.add('hidden')}
-async function trcoseSubmitClaim(){if(!trcoseActiveCampaign||!user)return;const b=$('vcClaimBtn');if(b)b.disabled=true;const {data,error}=await supabaseClient.rpc('trcose_video_finish',{p_claim_id:trcoseActiveCampaign.claim_id});if(error){$('videoRewardMessage').textContent='Reward ntiyoherejwe: '+error.message;if(b)b.disabled=false;return}const mins=Number(trcoseActiveCampaign.required_minutes)||0;$('videoRewardMessage').innerHTML='Byakiriwe! '+(mins*100000).toLocaleString()+' Trcose Reach Points na '+(mins*50)+' coins ('+trcoseCoinValueRwf(mins*50)+' RWF ku gipimo cya 50=15) byoherejwe gusuzumwa na Admin. Nyuma yo kwemezwa, ushobora gusaba Verify Account ya 2,000 RWF. <button type="button" class="verifyEarnBtn" onclick="trcoseRequestAccountVerification()">🛡️ Verify Your Account · 2,000 RWF</button>';trcoseStopWatch(true);await trcoseLoadCampaigns()}
+async function trcoseSubmitClaim(){if(!trcoseActiveCampaign||!user)return;const b=$('vcClaimBtn');if(b)b.disabled=true;const {data,error}=await supabaseClient.rpc('trcose_video_finish',{p_claim_id:trcoseActiveCampaign.claim_id});if(error){$('videoRewardMessage').textContent='Reward ntiyoherejwe: '+error.message;if(b)b.disabled=false;return}const mins=Number(trcoseActiveCampaign.required_minutes)||0;$('videoRewardMessage').innerHTML='Byakiriwe! '+(mins*100000).toLocaleString()+' Trcose Reach Points na '+(mins*50)+' coins ('+trcoseCoinValueRwf(mins*50)+' RWF ku gipimo cya 50=15) byoherejwe gusuzumwa na Admin. Konti yawe yemejwe; tegereza Admin kugenzura ibihembo.';trcoseStopWatch(true);await trcoseLoadCampaigns()}
 async function trcoseCreateCampaign(){if(!await isTrcoseAdmin())return;const title=$('vcTitle').value.trim(),url=$('vcUrl').value.trim(),minutes=Number($('vcMinutes').value),coins=Number($('vcMinutes').value)*50,budget=Number($('vcBudget').value),max=Number($('vcMaxViews').value);if(!title||!url||!/^https:\/\//i.test(url)||![1,2,3,5,7,10].includes(minutes)||coins<1||budget<1||max<1){$('vcAdminMessage').textContent='Uzuza umutwe, https link, iminota, coins, budget n’umubare w’abantu.';return}const {error}=await supabaseClient.from('video_campaigns').insert({title,video_url:url,required_minutes:minutes,reward_coins:coins,budget_rwf:budget,max_participants:max,created_by:user.id,status:'active'});$('vcAdminMessage').textContent=error?'Ntibyakunze: '+error.message:'Campaign yashyizweho.';if(!error){$('vcTitle').value='';$('vcUrl').value='';await trcoseLoadAdminCampaigns()}}
 async function trcoseLoadAdminCampaigns(){if(!await isTrcoseAdmin())return;const box=$('vcAdminList');if(!box)return;const {data,error}=await supabaseClient.from('video_campaigns').select('*').order('created_at',{ascending:false}).limit(100);if(error){box.innerHTML='<p class="error">'+escapeHTML(error.message)+'</p>';return}box.innerHTML=(data||[]).map(c=>`<div class="listrow"><b>${escapeHTML(c.title)}</b> · ${Number(c.required_minutes)} min · ${Number(c.reward_coins)} coins · ${escapeHTML(c.status)}<br><a href="${escapeHTML(c.video_url)}" target="_blank" rel="noopener">Fungura link</a> <button class="secondary" onclick="trcoseSetCampaignStatus('${c.id}','${c.status==='active'?'paused':'active'}')">${c.status==='active'?'Pause':'Activate'}</button></div>`).join('')||'Nta campaigns.'}
 async function trcoseSetCampaignStatus(id,status){if(!await isTrcoseAdmin())return;const {error}=await supabaseClient.from('video_campaigns').update({status}).eq('id',id);if(error)alert(error.message);else trcoseLoadAdminCampaigns()}
@@ -990,6 +1034,7 @@ async function submitPayment(){
  if(error){$("paymentMessage").innerHTML=`<span class="error">${escapeHTML(error.message)}</span>`;return}
  const requestLabel=p.type==="account_verification"?"ID ya Verify Account":"Payment request ID";
  $("paymentMessage").innerHTML=`<div class="success"><b>${requestLabel}: ${escapeHTML(data.id)}</b><br>Payment request yabitswe nka pending. Umaze kwishyura, ohereza screenshot kuri WhatsApp Support kugira ngo Admin agenzure payment.</div><div class="panel" style="margin-top:10px"><label for="paymentScreenshot"><b>📸 Hitamo screenshot ya payment</b></label><input id="paymentScreenshot" type="file" accept="image/*" capture="environment"><button type="button" class="successBtn" onclick="sendPaymentScreenshotSupport('${escapeHTML(data.id)}')">📤 Send payment screenshot</button><a class="supportTopBtn" style="margin:8px 0" href="https://wa.me/qr/SXDKDSH3MW7NO1" target="_blank" rel="noopener noreferrer">💬 WhatsApp Support</a><p class="muted">Iyi buto ifungura WhatsApp. Ongeraho screenshot wahisemo muri chat ya WhatsApp; ntabwo yoherezwa yonyine.</p></div>`;
+ if(p.type==="account_verification"){$("accountVerificationMessage").textContent="Ubusabe bwa Verify Account bwakiriwe. ID: "+data.id+". Umaze kwishyura 2,000 RWF, ohereza screenshot kuri WhatsApp Support. Tegereza Admin ayemeze.";}
  if(p.type==="listing")$("sellMessage").textContent="Payment request yoherejwe. Product izajya public gusa payment imaze verified.";
  if(p.type==="job_search")await refreshJobAccess();if(p.type==="exam")await refreshExamAccess();if(p.type==="exam_job")$("examJobStatus").textContent="Wait your work — payment request yoherejwe; tegereza Admin/gateway verification mbere yo kubona ikizamini." 
 }
@@ -1154,7 +1199,7 @@ async function loadAnalysis(){
 }
 
 async function loadReferralDashboard(){
- if(!user)return;const {data:profile}=await supabaseClient.from("profiles").select("referral_code").eq("id",user.id).maybeSingle();
+ if(!user){await trcoseRefreshVerificationStatus();return;}trcoseRefreshVerificationStatus();const {data:profile}=await supabaseClient.from("profiles").select("referral_code").eq("id",user.id).maybeSingle();
  if(profile?.referral_code)$("myReferralCode").textContent=profile.referral_code;else{const code="ZUN"+user.id.replace(/-/g,"").substring(0,8).toUpperCase();const {error}=await supabaseClient.from("profiles").update({referral_code:code}).eq("id",user.id);$("myReferralCode").textContent=error?"Ntabwo yabonetse":code}
  const {count}=await supabaseClient.from("referrals").select("id",{count:"exact",head:true}).eq("referrer_id",user.id);$("refCount").textContent=count||0;
  const {data:wallet}=await supabaseClient.from("referral_wallets").select("balance").eq("user_id",user.id).maybeSingle();$("refBalance").textContent=money(wallet?.balance||0);await loadWithdrawals()
@@ -1168,7 +1213,7 @@ async function applyReferralCode(){
 }
 async function requestWithdrawal(){
  if(!user){openAuth();return}const amount=Number($("withdrawAmount").value),method=$("withdrawMethod").value,account=$("withdrawAccount").value.trim();
- if(!amount||amount<70000){$("withdrawMessage").textContent="Minimum withdrawal ni 70,000 RWF.";return}if(!account){$("withdrawMessage").textContent="Andika phone cyangwa account.";return}
+ if(!amount||amount<100000){$("withdrawMessage").textContent="Minimum withdrawal ni 100,000 RWF.";return}if(!account){$("withdrawMessage").textContent="Andika phone cyangwa account.";return}
  const {data,error}=await supabaseClient.rpc("request_referral_withdrawal",{p_amount:amount,p_method:method,p_account:account});
  if(error){$("withdrawMessage").innerHTML=`<span class="error">${escapeHTML(error.message)}</span>`;return}
  $("withdrawMessage").innerHTML='<span class="success">Withdrawal request yoherejwe. Tegereza Admin verification.</span>';$("withdrawAmount").value="";$("withdrawAccount").value="";await loadReferralDashboard()
