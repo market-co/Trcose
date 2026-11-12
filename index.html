@@ -579,6 +579,13 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
 
 <section id="inboxPage" class="page hidden">
  <div class="panel"><h2>💬 Inbox</h2><div id="conversationList"><p class="muted">Nta conversations ziraboneka.</p></div></div>
+ <div class="panel" id="trcoseSupportChatPanel">
+  <div class="feedHeading"><div><h3>🛟 Trcose Support Chat</h3><p class="muted">Andikira Admin hano muri Trcose. Ntibisaba WhatsApp app cyangwa Meta ID.</p></div><button class="secondary" type="button" onclick="loadTrcoseSupportChat()">🔄 Refresh</button></div>
+  <div id="trcoseSupportChatStatus" class="compatNotice" role="status">Ubutumwa bubikwa muri Trcose. Injira muri konti yawe kugira ngo utangire.</div>
+  <div id="trcoseSupportChatMessages" class="chatMessages" style="min-height:180px;max-height:45vh;overflow:auto"></div>
+  <textarea id="trcoseSupportChatInput" rows="3" maxlength="4000" placeholder="Andika ubutumwa bwawe kuri Trcose Admin..."></textarea>
+  <button type="button" onclick="sendTrcoseSupportMessage()">📤 Ohereza kuri Trcose Admin</button>
+ </div>
  <div class="panel hidden" id="chatPanel"><h3 id="chatTitle">Chat</h3><div class="chatBox">
   <div id="chatMessages" class="chatMessages"></div><div class="smallgrid"><input id="chatInput" placeholder="Andika message..."><button onclick="sendChatMessage()">📤 Ohereza</button></div>
  </div></div>
@@ -663,8 +670,25 @@ body > .skiptranslate, body > iframe.goog-te-banner-frame, iframe.goog-te-banner
   <textarea id="trcoseWhatsAppBody" rows="5" maxlength="4000" placeholder="Andika ubutumwa ushaka kohereza..."></textarea>
   <p class="muted">Kohereza bikorwa gusa ku bantu bemeye kwakira ubutumwa bwa Trcose. Ubutumwa bwo hanze y'igihe cya WhatsApp cy'amasaha 24 bushobora gusaba template yemejwe na Meta.</p>
   <button id="trcoseWhatsAppSendBtn" onclick="trcoseSendWhatsAppBroadcast()">📤 Ohereza ubutumwa kuri bose</button>
-  <p id="trcoseWhatsAppStatus" class="muted" role="status" aria-live="polite">Cloud API igomba kubanza gushyirwaho muri Supabase kugira ngo kohereza byikore.</p>
+  <p id="trcoseWhatsAppStatus" class="muted" role="status" aria-live="polite">Cloud API igomba kubanza gushyirwaho muri Supabase kugira ngo kohereza kuri WhatsApp nyayo byikore.</p>
+  <div class="compatNotice"><b>Meta itaraboneka?</b> Ushobora gukomeza kwakira no gusubiza abakiriya muri Trcose Support Inbox. Ibi ni chat yo muri Trcose, si WhatsApp nyayo. Ubutumwa bwa WhatsApp buzajya bwinjira hano nyuma yo guhuza Meta Cloud API na Webhook.</div>
+  <button type="button" class="successBtn" onclick="showAdminTab('supportInbox')">🛟 Fungura Trcose Support Inbox</button>
   <div id="trcoseWhatsAppResult" class="muted"></div>
+ </div>
+ <div id="adminSupportInboxSection" class="panel hidden">
+  <h3>🛟 Trcose Support Inbox</h3>
+  <p class="muted">Ubutumwa bw'abakiriya buva muri Trcose Support Chat. Subiza hano; umukiriya azabusoma muri Inbox ye. Ibi birakora na Meta ID itaraboneka.</p>
+  <div class="actionRow"><button class="secondary" type="button" onclick="loadAdminSupportInbox()">🔄 Refresh conversations</button></div>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+   <div><h4>Abakiriya banditse</h4><div id="adminSupportConversationList"><p class="muted">Kanda Refresh.</p></div></div>
+   <div>
+    <h4 id="adminSupportThreadTitle">Hitamo umukiriya</h4>
+    <div id="adminSupportThreadMessages" class="chatMessages" style="min-height:220px;max-height:45vh;overflow:auto"></div>
+    <textarea id="adminSupportReplyInput" rows="3" maxlength="4000" placeholder="Subiza umukiriya..."></textarea>
+    <button type="button" onclick="sendAdminSupportReply()">📤 Ohereza igisubizo</button>
+    <p id="adminSupportReplyStatus" class="muted" role="status"></p>
+   </div>
+  </div>
  </div>
  <div id="adminUsersSection" class="panel hidden"><h3>🔐 Users & Activity</h3><p class="muted">Iyi tab igaragara ku ma-email yemewe gusa. “Recent activity” ni ibikorwa byanditswe muri product_events; si igipimo nyacyo cya online presence.</p><div class="stats"><div class="stat">🟢 Online now<br><b id="adminOnlineUsers">—</b></div><div class="stat">👥 Users<br><b id="adminUsersCount">—</b></div><div class="stat">🛍️ Products<br><b id="adminProductsCount">—</b></div><div class="stat">⚡ Recent events<br><b id="adminRecentEvents">—</b></div><div class="stat">💼 Jobs<br><b id="adminJobsCount">—</b></div></div><button class="secondary" onclick="loadAdminUsers()">🔄 Refresh users / activity</button><div id="adminUsersList"></div></div>
  <div id="adminVideoCampaignSection" class="panel hidden">
@@ -786,7 +810,7 @@ function showPage(page){
  if(page==="orders")loadOrders();
  if(page==="jobs"){refreshJobAccess();refreshExamAccess()}
  if(page==="referral"){loadReferralDashboard();trcoseLoadCampaigns()}
- if(page==="inbox")loadConversations();
+ if(page==="inbox"){loadConversations();loadTrcoseSupportChat();}
  if(page==="businessManager")loadBusinessManagerDashboard();
  if(page==="profile"){if(user){loadProfileFollowers();loadMyPosts();loadFollowStats()}}
 }
@@ -796,7 +820,7 @@ async function updateAdminUI(){$("adminNavBtn").style.display=await isTrcoseAdmi
 async function refreshUser(){const {data}=await supabaseClient.auth.getUser();user=data.user||null;await updateAdminUI();if(user){await loadProfile();await loadWallet();await loadTrcosePublicMessages(false)}}
 async function init(){
  const {data}=await supabaseClient.auth.getSession();user=data.session?.user||null;await updateAdminUI();startTrcosePresence();
- supabaseClient.auth.onAuthStateChange((event,session)=>{const nextUser=session?.user||null;const presenceIdentityChanged=(user?.id||null)!==(nextUser?.id||null);user=nextUser;if(presenceIdentityChanged)startTrcosePresence();if(event==="PASSWORD_RECOVERY"){$("passwordRecoveryModal")?.classList.add("show");closeAuth()}setTimeout(async()=>{await updateAdminUI();if(user){await loadProfile();await loadFollowStats();await loadProfileFollowers();await loadMyPosts();await loadTrcosePublicMessages(false);let openReferral=false;try{openReferral=sessionStorage.getItem('trcose_open_referral_after_auth')==='1';if(openReferral)sessionStorage.removeItem('trcose_open_referral_after_auth')}catch(e){}if(openReferral){showPage('referral');await trcoseRefreshVerificationStatus();$('accountVerificationMessage')?.scrollIntoView({behavior:'smooth',block:'center'});}}renderProducts();loadMixedPublicFeed();loadFreeVideoPosts()},0)});
+ supabaseClient.auth.onAuthStateChange((event,session)=>{const nextUser=session?.user||null;const presenceIdentityChanged=(user?.id||null)!==(nextUser?.id||null);user=nextUser;if(presenceIdentityChanged)startTrcosePresence();if(event==="SIGNED_IN"){$("authMessage").textContent="Winjiye neza kuri Trcose.";setLoginLoading(false);closeAuth()}if(event==="SIGNED_OUT")setLoginLoading(false);if(event==="PASSWORD_RECOVERY"){$("passwordRecoveryModal")?.classList.add("show");closeAuth()}setTimeout(async()=>{await updateAdminUI();if(user){await loadProfile();await loadFollowStats();await loadProfileFollowers();await loadMyPosts();await loadTrcosePublicMessages(false);let openReferral=false;try{openReferral=sessionStorage.getItem('trcose_open_referral_after_auth')==='1';if(openReferral)sessionStorage.removeItem('trcose_open_referral_after_auth')}catch(e){}if(openReferral){showPage('referral');await trcoseRefreshVerificationStatus();$('accountVerificationMessage')?.scrollIntoView({behavior:'smooth',block:'center'});}}renderProducts();loadMixedPublicFeed();setTimeout(()=>loadFreeVideoPosts(),1800)},0)});
  await loadProducts();renderProducts();await loadMixedPublicFeed();
  if(user){Promise.allSettled([loadProfile(),refreshJobAccess(),refreshExamAccess()]).catch(e=>console.warn('Profile background tasks',e))}
  // A direct share URL opens the dedicated Video Earn / Referral page.
@@ -806,7 +830,8 @@ async function init(){
  // Open a product when someone visits a shared Trcose link such as ?product=UUID.
  try{const sharedProductId=new URLSearchParams(window.location.search).get("product");if(sharedProductId){const sharedProduct=products.find(p=>String(p.id)===String(sharedProductId))||demoProducts.find(p=>String(p.id)===String(sharedProductId));if(sharedProduct){await openProduct(sharedProductId)}else{const details=$("productDetails");if(details)details.innerHTML="<div class='notice'>Iki gicuruzwa ntikiboneka kuri public cyangwa link si yo.</div>"}}}catch(e){console.warn("Shared product link error",e)}
  loadPublicAds();
- loadFreeVideoPosts();
+ // Heavy video feed loads after the main page is usable.
+ setTimeout(()=>loadFreeVideoPosts(),2200);
  if(user)loadFollowStats();
 }
 // Trcose AI Video Rewards — secure claims are held for Admin approval.
@@ -914,8 +939,10 @@ window.addEventListener("load",()=>setTimeout(trcoseBootPublicFeed,300),{once:tr
 
 async function googleLogin(){
  setLoginLoading(true);
- const {error}=await supabaseClient.auth.signInWithOAuth({provider:"google",options:{redirectTo:window.location.origin+window.location.pathname+window.location.search,queryParams:{prompt:"select_account"}}});
- if(error){$("authMessage").textContent=error.message;setLoginLoading(false)}
+ try{
+  const {error}=await supabaseClient.auth.signInWithOAuth({provider:"google",options:{redirectTo:window.location.origin+window.location.pathname+window.location.search,queryParams:{prompt:"select_account"}}});
+  if(error){$("authMessage").textContent=error.message;setLoginLoading(false)}
+ }catch(error){$("authMessage").textContent=error?.message||"Google login ntiyashoboye gutangira. Ongera ugerageze.";setLoginLoading(false)}
 }
 async function sendPasswordReset(){
  const email=$("authEmail").value.trim();
@@ -1344,6 +1371,72 @@ async function sendChatMessage(){
  if(!user||!activeChatUserId)return;const input=$("chatInput"),body=input.value.trim();if(!body)return;
  const {error}=await supabaseClient.from("messages").insert({sender_id:user.id,receiver_id:activeChatUserId,body});if(error){alert(error.message);return}input.value="";await openConversation(activeChatUserId)
 }
+// Trcose internal Support Chat: works independently of WhatsApp/Meta.
+let activeTrcoseSupportUserId=null;
+function openTrcoseSupportChat(){
+ if(!user){openAuth();return;}
+ showPage("inbox");
+ loadTrcoseSupportChat();
+ $("trcoseSupportChatPanel")?.scrollIntoView({behavior:"smooth",block:"start"});
+}
+async function loadTrcoseSupportChat(){
+ const box=$("trcoseSupportChatMessages"),status=$("trcoseSupportChatStatus");
+ if(!box)return;
+ if(!user){if(status)status.textContent="Banza winjire muri Trcose kugira ngo wandikire Admin.";box.innerHTML="<p class='muted'>Injira muri konti yawe kugira ngo utangire kuganira na Trcose Support.</p>";return;}
+ if(status)status.textContent="Turimo kuzana ubutumwa bwawe...";
+ const {data,error}=await supabaseClient.from("trcose_support_messages")
+  .select("id,user_id,sender_id,sender_role,body,created_at")
+  .eq("user_id",user.id).order("created_at",{ascending:true}).limit(200);
+ if(error){box.innerHTML=`<div class="error">Support Chat ntirafunguka: ${escapeHTML(error.message)}. Reba SQL ya Trcose Support Chat muri Supabase.</div>`;if(status)status.textContent="Supabase table cyangwa RLS policy biracyasabwa.";return;}
+ box.innerHTML=(data||[]).map(m=>`<div class="msg ${m.sender_role==="user"?"me":"other"}"><b>${m.sender_role==="user"?"Wowe":"Trcose Admin"}</b><br>${escapeHTML(m.body||"")}<br><small>${m.created_at?new Date(m.created_at).toLocaleString():""}</small></div>`).join("")||"<p class='muted'>Nta butumwa urandika. Tangiza ikiganiro na Trcose Admin.</p>";
+ box.scrollTop=box.scrollHeight;
+ if(status)status.textContent="Chat ya Trcose irakora. Ubutumwa bubikwa muri konti yawe.";
+}
+async function sendTrcoseSupportMessage(){
+ if(!user){openAuth();return;}
+ const input=$("trcoseSupportChatInput"),body=String(input?.value||"").trim(),status=$("trcoseSupportChatStatus");
+ if(!body)return;
+ const btn=input?.nextElementSibling;if(btn)btn.disabled=true;
+ if(status)status.textContent="Turimo kubika ubutumwa...";
+ const {error}=await supabaseClient.from("trcose_support_messages").insert({user_id:user.id,sender_id:user.id,sender_role:"user",body});
+ if(error){if(status)status.textContent="Ubutumwa ntibwabitswe: "+error.message+". Reba SQL/RLS ya Support Chat.";if(btn)btn.disabled=false;return;}
+ input.value="";await loadTrcoseSupportChat();if(btn)btn.disabled=false;
+}
+async function loadAdminSupportInbox(){
+ if(!await isTrcoseAdmin())return;
+ const box=$("adminSupportConversationList");if(!box)return;
+ box.innerHTML="<p class='muted'>Turimo gushaka abakiriya banditse...</p>";
+ const {data,error}=await supabaseClient.from("trcose_support_messages")
+  .select("id,user_id,sender_id,sender_role,body,created_at")
+  .order("created_at",{ascending:false}).limit(500);
+ if(error){box.innerHTML=`<div class="error">Ntibyashobotse gufungura Support Inbox: ${escapeHTML(error.message)}. Reba SQL/RLS.</div>`;return;}
+ const latest=new Map();
+ for(const m of data||[]){if(!latest.has(m.user_id))latest.set(m.user_id,m);}
+ if(!latest.size){box.innerHTML="<p class='muted'>Nta mukiriya urandikira Trcose Support.</p>";return;}
+ box.innerHTML=[...latest.values()].map(m=>`<button class="secondary" style="width:100%;text-align:left;margin:4px 0" onclick="openAdminSupportThread('${String(m.user_id).replace(/'/g,"")}')">👤 ${escapeHTML(String(m.user_id).slice(0,12))}…<br><small>${escapeHTML(String(m.body||"").slice(0,75))}</small></button>`).join("");
+}
+async function openAdminSupportThread(customerId){
+ if(!await isTrcoseAdmin()||!customerId)return;
+ activeTrcoseSupportUserId=customerId;
+ const title=$("adminSupportThreadTitle"),box=$("adminSupportThreadMessages");
+ if(title)title.textContent="Ikiganiro na "+String(customerId).slice(0,16)+"…";
+ if(box)box.innerHTML="<p class='muted'>Turimo kuzana ubutumwa...</p>";
+ const {data,error}=await supabaseClient.from("trcose_support_messages")
+  .select("id,user_id,sender_id,sender_role,body,created_at")
+  .eq("user_id",customerId).order("created_at",{ascending:true}).limit(200);
+ if(error){if(box)box.innerHTML=`<div class="error">${escapeHTML(error.message)}</div>`;return;}
+ if(box){box.innerHTML=(data||[]).map(m=>`<div class="msg ${m.sender_role==="admin"?"me":"other"}"><b>${m.sender_role==="admin"?"Admin":"Umukiriya"}</b><br>${escapeHTML(m.body||"")}<br><small>${m.created_at?new Date(m.created_at).toLocaleString():""}</small></div>`).join("")||"<p class='muted'>Nta butumwa.</p>";box.scrollTop=box.scrollHeight;}
+}
+async function sendAdminSupportReply(){
+ if(!await isTrcoseAdmin()||!activeTrcoseSupportUserId)return;
+ const input=$("adminSupportReplyInput"),body=String(input?.value||"").trim(),status=$("adminSupportReplyStatus");
+ if(!body)return;
+ if(status)status.textContent="Turimo kohereza igisubizo...";
+ const {error}=await supabaseClient.from("trcose_support_messages").insert({user_id:activeTrcoseSupportUserId,sender_id:user.id,sender_role:"admin",body});
+ if(error){if(status)status.textContent="Igisubizo nticyoherejwe: "+error.message;return;}
+ input.value="";if(status)status.textContent="Igisubizo cyoherejwe muri Trcose Inbox y'umukiriya.";
+ await openAdminSupportThread(activeTrcoseSupportUserId);await loadAdminSupportInbox();
+}
 async function openProductComments(productId){
  const box=$("productComments-"+productId);if(!box)return;const {data,error}=await supabaseClient.from("product_comments").select("id,user_id,body,created_at").eq("product_id",productId).order("created_at",{ascending:true});
  if(error){box.innerHTML=`<div class="error">${escapeHTML(error.message)}</div>`;return}
@@ -1481,10 +1574,13 @@ async function isFollowingUser(targetId){
  const {data,error}=await supabaseClient.rpc("is_following_user",{p_followed_id:targetId});
  return !error&&data===true;
 }
+let trcoseVideoPostsLoading=false;
 async function loadFreeVideoPosts(){
- const box=$("videoPosts");if(!box)return;
+ const box=$("videoPosts");if(!box||trcoseVideoPostsLoading)return;
+ trcoseVideoPostsLoading=true;
+ try{
  box.innerHTML='<p class="muted">Turimo gushaka video posts...</p>';
- const {data,error}=await supabaseClient.from("products").select("*").eq("category","Video").eq("status","active").order("created_at",{ascending:false}).limit(40);
+ const {data,error}=await supabaseClient.from("products").select("id,name,description,seller_id,media_url,image_url,thumbnail_url").eq("category","Video").eq("status","active").order("created_at",{ascending:false}).limit(12);
  if(error){box.innerHTML=`<div class="notice">Video posts ntizashoboye kwerekanwa: ${escapeHTML(error.message)}</div>`;return}
  if(!data?.length){box.innerHTML='<div class="panel muted">Nta video posts zirashyirwaho. Ba uwa mbere!</div>';return}
  const cards=await Promise.all(data.map(async p=>{
@@ -1507,6 +1603,7 @@ async function loadFreeVideoPosts(){
    ${user&&p.seller_id===user.id?`<button class="secondary" onclick="editMyVideoPost('${p.id}')">✏️ Edit</button><button class="secondary" onclick="removeProductFromPublic('${p.id}')">🙈 Unpublish</button><button class="danger" onclick="deleteMyProduct('${p.id}')">🗑️ Delete</button>`:""}</div></div></article>`;
  }));
  box.innerHTML=cards.join("");
+ }finally{trcoseVideoPostsLoading=false}
 }
 const videoViewRecorded = new Set();
 async function editMyVideoPost(id){
@@ -1667,6 +1764,7 @@ async function showAdminDashboard(){if(!await isTrcoseAdmin()){alert("Nturi Admi
   $("adminManagerSection").classList.toggle("hidden", t !== "managers");
   $("adminBroadcastSection")?.classList.toggle("hidden",t!=="broadcast");
   $("adminWhatsAppSection")?.classList.toggle("hidden",t!=="whatsapp");
+  $("adminSupportInboxSection")?.classList.toggle("hidden",t!=="supportInbox");
   $("adminUsersSection")?.classList.toggle("hidden",t!=="users");
   $("adminContentSection")?.classList.toggle("hidden",t!=="content");
   $("adminVideoCampaignSection")?.classList.toggle("hidden",t!=="videoCampaigns");
@@ -1678,6 +1776,7 @@ async function showAdminDashboard(){if(!await isTrcoseAdmin()){alert("Nturi Admi
   if(t === "managers") loadAdminManagerRequests();
   if(t === "users") loadAdminUsers();
   if(t === "broadcast") loadAdminBroadcastHistory();
+  if(t === "supportInbox") loadAdminSupportInbox();
   if(t === "content") {loadAdminContent();loadAdminComments()}
   if(t === "videoCampaigns") {trcoseLoadAdminCampaigns();trcoseLoadAdminClaims()}
   if(t === "earnBranding") loadEarnBranding(true);
