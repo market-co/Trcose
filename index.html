@@ -1009,11 +1009,24 @@ async function uploadProfilePhoto(){
  return supabaseClient.storage.from("profile-pictures").getPublicUrl(path).data.publicUrl
 }
 
+let trcoseProductsLoadError=null;
 async function loadProducts(){
- try{const {data,error}=await supabaseClient.from("products").select("*").eq("status","active").order("created_at",{ascending:false}).limit(80);products=!error&&data?data:demoProducts}
- catch(e){products=demoProducts}
+ trcoseProductsLoadError=null;
+ try{
+  const {data,error}=await supabaseClient.from("products").select("*").eq("status","active").order("created_at",{ascending:false}).limit(80);
+  if(error)throw error;
+  products=Array.isArray(data)?data:[];
+ }catch(e){
+  trcoseProductsLoadError=e;
+  products=[];
+  console.error("Trcose products load error",e);
+ }
 }
 function renderProducts(){
+ // The old products grid is not present in the current Home layout.
+ // Do not let this legacy renderer stop init() before Public Feed loads.
+ const productsBox=$("products");
+ if(!productsBox)return;
  const q=($("searchBox")?.value||"").toLowerCase().trim();
  const list=(products.length?products:demoProducts).filter(p=>String(p.category||"").toLowerCase()!=="video").filter(p=>!q||[p.name,p.category,p.city,p.description].join(" ").toLowerCase().includes(q));
  $("products").innerHTML=list.length?list.map(p=>`
@@ -1027,6 +1040,12 @@ function renderProducts(){
  setTimeout(hydrateProductSellers,0)
 }
 // One shared public feed: active products and video posts are rendered together.
+async function retryTrcosePublicFeed(){
+ const box=$("publicFeed");
+ if(box)box.innerHTML='<p class="muted">Turimo kongera kugerageza kuzana posts...</p>';
+ await loadProducts();
+ await loadMixedPublicFeed();
+}
 async function loadMixedPublicFeed(){
  const box=$("publicFeed");if(!box)return;
  trcosePublicFeedBooted=true;
@@ -1039,7 +1058,14 @@ async function loadMixedPublicFeed(){
   // Use stored counters when present. Avoid one network request per product on mobile.
   const viewCount=p=>Number(p.view_count||p.views||0);
   visible.sort((a,b)=>viewCount(b)-viewCount(a)||new Date(b.created_at||0)-new Date(a.created_at||0));
-  if(!visible.length){box.innerHTML='<div class="feedEmpty">Nta posts za Public zihari. Shyiraho product cyangwa video ya mbere!</div>';return;}
+  if(!visible.length){
+   if(trcoseProductsLoadError){
+    box.innerHTML=`<div class="notice">Public Feed ntiyabashije gusoma products muri Supabase: ${escapeHTML(trcoseProductsLoadError.message||"Ikosa ritazwi")}. Reba connection, Supabase key na RLS, hanyuma wongere ugerageze.<br><button class="secondary" type="button" onclick="retryTrcosePublicFeed()">🔄 Ongera ugerageze</button></div>`;
+   }else{
+    box.innerHTML='<div class="feedEmpty">Nta posts za Public zihari. Shyiraho product cyangwa video ya mbere!</div>';
+   }
+   return;
+  }
   const productHtml=visible.map(p=>{
    const isVideo=String(p.category||"").toLowerCase()==="video"||String(p.media_type||"").toLowerCase()==="video"||!!p.video_url;
    const id=String(p.id).replace(/'/g,"\\'");
@@ -1052,7 +1078,7 @@ async function loadMixedPublicFeed(){
   box.innerHTML='<div class="feedList">'+productHtml+'</div>';
  }catch(e){
   console.error("Public Feed load error",e);
-  box.innerHTML=`<div class="notice">Public Feed ntishoboye kwikorera: ${escapeHTML(e?.message||"Reba internet na Supabase.")}<br><button class="secondary" onclick="loadMixedPublicFeed()">🔄 Ongera ugerageze</button></div>`;
+  box.innerHTML=`<div class="notice">Public Feed ntishoboye kwikorera: ${escapeHTML(e?.message||"Reba internet na Supabase.")}<br><button class="secondary" type="button" onclick="retryTrcosePublicFeed()">🔄 Ongera ugerageze</button></div>`;
  }
 }
 async function openProduct(id){
